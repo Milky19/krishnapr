@@ -1,467 +1,282 @@
-import { useState } from "react";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Krishna | DevOps Trainer @ PythonLife</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700;800&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --aws: #FF9900;
+    --aws-dark: #e07b00;
+    --green: #00ff88;
+    --blue: #00d4ff;
+    --bg: #080c10;
+    --surface: #0e1419;
+    --surface2: #141c24;
+    --border: rgba(255,153,0,0.15);
+    --text: #c9d1d9;
+    --muted: #4a5568;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: 'JetBrains Mono', monospace; overflow-x: hidden; cursor: crosshair; }
+  body::before { content: ''; position: fixed; inset: 0; z-index: 9999; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px); pointer-events: none; }
+  .bg-grid { position: fixed; inset: 0; z-index: 0; background-image: linear-gradient(rgba(255,153,0,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,153,0,0.04) 1px, transparent 1px); background-size: 60px 60px; animation: gridShift 20s linear infinite; }
+  @keyframes gridShift { 0%{background-position:0 0} 100%{background-position:60px 60px} }
+  .orb { position: fixed; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0; }
+  .orb-1 { width: 500px; height: 500px; background: rgba(255,153,0,0.06); top: -200px; right: -100px; }
+  .orb-2 { width: 400px; height: 400px; background: rgba(0,212,255,0.05); bottom: 10%; left: -150px; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+  nav { position: fixed; top: 0; width: 100%; z-index: 100; background: rgba(8,12,16,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 0 24px; }
+  .nav-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 56px; }
+  .nav-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; color: var(--aws); letter-spacing: -0.5px; }
+  .nav-logo span { color: var(--text); }
+  .nav-links { display: flex; gap: 28px; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--aws); }
+  .nav-status { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--green); }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: blink 2s ease-in-out infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .hero { min-height: 100vh; display: flex; align-items: center; padding: 100px 0 60px; }
+  .hero-content { max-width: 700px; }
+  .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,153,0,0.08); border: 1px solid rgba(255,153,0,0.25); border-radius: 4px; padding: 6px 14px; margin-bottom: 28px; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--aws); }
+  .hero-badge::before { content: '▶'; font-size: 8px; }
+  .hero-name { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(3rem,8vw,5.5rem); line-height: 0.95; letter-spacing: -3px; color: #fff; margin-bottom: 4px; }
+  .hero-name .accent { color: var(--aws); }
+  .hero-role { font-family: 'Syne', sans-serif; font-size: clamp(1rem,2.5vw,1.3rem); color: var(--muted); font-weight: 400; letter-spacing: 1px; margin-bottom: 28px; }
+  .hero-role strong { color: var(--blue); font-weight: 400; }
+  .terminal { background: var(--surface); border: 1px solid rgba(255,153,0,0.2); border-radius: 8px; overflow: hidden; margin-bottom: 36px; max-width: 520px; }
+  .terminal-bar { background: var(--surface2); padding: 10px 16px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .t-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .t-dot.r { background: #ff5f57; } .t-dot.y { background: #febc2e; } .t-dot.g { background: #28c840; }
+  .terminal-bar-title { margin-left: 8px; font-size: 11px; color: var(--muted); }
+  .terminal-body { padding: 20px; font-size: 12.5px; line-height: 2; }
+  .t-line { display: flex; gap: 8px; }
+  .t-prompt { color: var(--aws); flex-shrink: 0; }
+  .t-cmd { color: var(--green); }
+  .t-out { color: var(--text); padding-left: 16px; }
+  .t-out span { color: var(--blue); }
+  .cursor { display: inline-block; width: 8px; height: 14px; background: var(--green); vertical-align: middle; margin-left: 2px; animation: cursorBlink 1s step-end infinite; }
+  @keyframes cursorBlink { 0%,100%{opacity:1} 50%{opacity:0} }
+  .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn { padding: 12px 24px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; text-decoration: none; display: inline-block; transition: all 0.2s; }
+  .btn-primary { background: var(--aws); color: #000; border: none; box-shadow: 0 4px 20px rgba(255,153,0,0.3); }
+  .btn-primary:hover { background: var(--aws-dark); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(255,153,0,0.4); }
+  .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--aws); color: var(--aws); transform: translateY(-2px); }
+  .hero-stats { display: flex; gap: 32px; margin-top: 48px; padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.05); flex-wrap: wrap; }
+  .stat-num { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: var(--aws); line-height: 1; }
+  .stat-label { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+  section { padding: 80px 0; }
+  .section-header { margin-bottom: 48px; }
+  .section-tag { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--aws); margin-bottom: 12px; }
+  .section-tag::before { content: '// '; color: var(--muted); }
+  .section-title { font-family: 'Syne', sans-serif; font-size: clamp(1.8rem,4vw,2.8rem); font-weight: 800; color: #fff; letter-spacing: -1px; line-height: 1.1; }
+  .tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+  .tool-card { background: var(--surface); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 20px; transition: all 0.25s; position: relative; overflow: hidden; }
+  .tool-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--tool-color, var(--aws)); opacity: 0; transition: opacity 0.25s; }
+  .tool-card:hover { border-color: rgba(255,153,0,0.25); transform: translateY(-3px); background: var(--surface2); }
+  .tool-card:hover::before { opacity: 1; }
+  .tool-icon { font-size: 28px; margin-bottom: 12px; }
+  .tool-name { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .tool-cat { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+  .tool-bar { margin-top: 14px; height: 3px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; }
+  .tool-bar-fill { height: 100%; border-radius: 2px; width: 0; transition: width 1.2s cubic-bezier(0.4,0,0.2,1); }
+  .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+  .project-card { background: var(--surface); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 24px; transition: all 0.25s; }
+  .project-card:hover { border-color: rgba(255,153,0,0.3); transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 24px rgba(255,153,0,0.08); }
+  .project-num { font-size: 11px; color: var(--aws); letter-spacing: 2px; margin-bottom: 10px; }
+  .project-title { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 10px; line-height: 1.3; }
+  .project-desc { font-size: 12px; color: var(--muted); line-height: 1.7; margin-bottom: 16px; }
+  .project-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag { padding: 3px 9px; border-radius: 3px; font-size: 10px; letter-spacing: 1px; background: rgba(255,153,0,0.08); border: 1px solid rgba(255,153,0,0.15); color: var(--aws); }
+  .tag.blue { background: rgba(0,212,255,0.08); border-color: rgba(0,212,255,0.15); color: var(--blue); }
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+  @media(max-width:700px){.about-grid{grid-template-columns:1fr}}
+  .about-text p { font-size: 13px; color: var(--muted); line-height: 2; margin-bottom: 16px; }
+  .about-text p strong { color: var(--text); }
+  .about-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 28px; }
+  .about-card-title { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--aws); margin-bottom: 20px; }
+  .about-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .about-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .about-item-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+  .about-item-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .about-item-value { font-size: 13px; color: #fff; margin-top: 2px; }
+  .contact-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 48px; text-align: center; position: relative; overflow: hidden; }
+  .contact-box::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(255,153,0,0.05) 0%, transparent 70%); pointer-events: none; }
+  .contact-box h3 { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: #fff; margin-bottom: 12px; letter-spacing: -1px; }
+  .contact-box p { font-size: 13px; color: var(--muted); margin-bottom: 32px; }
+  .contact-links { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .contact-link { display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; border-radius: 6px; font-size: 12px; font-family: 'JetBrains Mono', monospace; text-decoration: none; transition: all 0.2s; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text); }
+  .contact-link:hover { border-color: var(--aws); color: var(--aws); transform: translateY(-2px); }
+  footer { border-top: 1px solid rgba(255,255,255,0.05); padding: 28px 0; text-align: center; font-size: 11px; color: var(--muted); }
+  footer span { color: var(--aws); }
+  .divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(255,153,0,0.15), transparent); }
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  @media(max-width:600px){ .nav-links{display:none} .hero-stats{gap:20px} .tools-grid{grid-template-columns:repeat(2,1fr)} .projects-grid{grid-template-columns:1fr} .contact-box{padding:28px 20px} }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
 
-const devopsTools = [
-  {
-    id: 1,
-    name: "Docker",
-    icon: "🐳",
-    category: "Containerization",
-    color: "#0db7ed",
-    description: "Docker packages applications and their dependencies into lightweight containers, ensuring consistency across environments from development to production.",
-    usage: "Build, ship, and run any app, anywhere. Used for microservices, CI/CD pipelines, and environment isolation.",
-    mcqs: [
-      { q: "What is the default Docker network driver?", options: ["bridge", "host", "overlay", "macvlan"], answer: 0 },
-      { q: "Which command builds a Docker image from a Dockerfile?", options: ["docker run", "docker build", "docker create", "docker start"], answer: 1 },
-      { q: "What file defines a multi-container Docker application?", options: ["Dockerfile", "docker-compose.yml", "docker.config", "container.yaml"], answer: 1 },
-      { q: "Which command lists all running containers?", options: ["docker images", "docker ps", "docker ls", "docker list"], answer: 1 },
-    ]
-  },
-  {
-    id: 2,
-    name: "Kubernetes",
-    icon: "☸️",
-    category: "Orchestration",
-    color: "#326ce5",
-    description: "Kubernetes (K8s) is an open-source container orchestration platform that automates deployment, scaling, and management of containerized applications.",
-    usage: "Managing container clusters at scale, auto-healing, load balancing, rolling updates, and service discovery.",
-    mcqs: [
-      { q: "What is the smallest deployable unit in Kubernetes?", options: ["Container", "Pod", "Node", "Cluster"], answer: 1 },
-      { q: "Which component acts as the cluster's control plane?", options: ["kubelet", "kube-proxy", "kube-apiserver", "etcd"], answer: 2 },
-      { q: "What Kubernetes object manages stateless application replicas?", options: ["StatefulSet", "DaemonSet", "Deployment", "Job"], answer: 2 },
-      { q: "Which command applies a configuration file to a cluster?", options: ["kubectl run", "kubectl apply", "kubectl create", "kubectl set"], answer: 1 },
-    ]
-  },
-  {
-    id: 3,
-    name: "Jenkins",
-    icon: "🏗️",
-    category: "CI/CD",
-    color: "#d33833",
-    description: "Jenkins is an open-source automation server that enables continuous integration and delivery by automating build, test, and deployment pipelines.",
-    usage: "Automating software build pipelines, running tests on every commit, and deploying applications automatically.",
-    mcqs: [
-      { q: "What file defines a Jenkins pipeline as code?", options: ["jenkins.yaml", "Jenkinsfile", "pipeline.groovy", "build.xml"], answer: 1 },
-      { q: "Which Jenkins feature allows parallel execution?", options: ["Stage", "Step", "Parallel", "Agent"], answer: 2 },
-      { q: "What is the Jenkins default port?", options: ["8080", "8443", "9090", "3000"], answer: 0 },
-      { q: "Which plugin integrates Jenkins with Git?", options: ["Maven Plugin", "Git Plugin", "Pipeline Plugin", "Slack Plugin"], answer: 1 },
-    ]
-  },
-  {
-    id: 4,
-    name: "Terraform",
-    icon: "🏔️",
-    category: "IaC",
-    color: "#7b42bc",
-    description: "Terraform is an Infrastructure as Code tool by HashiCorp that allows you to define and provision cloud infrastructure using declarative configuration files.",
-    usage: "Provisioning AWS, Azure, GCP resources, managing infrastructure lifecycle, and enabling GitOps workflows.",
-    mcqs: [
-      { q: "What language does Terraform use for configuration?", options: ["YAML", "JSON", "HCL", "XML"], answer: 2 },
-      { q: "Which command initializes a Terraform working directory?", options: ["terraform start", "terraform init", "terraform setup", "terraform begin"], answer: 1 },
-      { q: "What does 'terraform plan' do?", options: ["Applies changes", "Shows execution plan", "Destroys resources", "Validates syntax"], answer: 1 },
-      { q: "Which file stores Terraform state?", options: ["main.tf", "variables.tf", "terraform.tfstate", "outputs.tf"], answer: 2 },
-    ]
-  },
-  {
-    id: 5,
-    name: "Ansible",
-    icon: "⚙️",
-    category: "Configuration Mgmt",
-    color: "#ee0000",
-    description: "Ansible is an agentless automation tool that uses YAML-based playbooks to configure systems, deploy applications, and orchestrate complex IT tasks.",
-    usage: "Server configuration, application deployment, patch management, and automating repetitive IT operations.",
-    mcqs: [
-      { q: "What language are Ansible playbooks written in?", options: ["Python", "JSON", "YAML", "Ruby"], answer: 2 },
-      { q: "What is the Ansible inventory file used for?", options: ["Storing variables", "Defining target hosts", "Writing tasks", "Managing roles"], answer: 1 },
-      { q: "Which Ansible command runs a playbook?", options: ["ansible-run", "ansible-play", "ansible-playbook", "ansible-exec"], answer: 2 },
-      { q: "Ansible operates without installing agents on remote hosts — True or False?", options: ["True", "False", "Only on Linux", "Depends on OS"], answer: 0 },
-    ]
-  },
-  {
-    id: 6,
-    name: "Git",
-    icon: "🌿",
-    category: "Version Control",
-    color: "#f05032",
-    description: "Git is a distributed version control system that tracks changes in source code, enabling collaboration, branching, and complete history management.",
-    usage: "Source code management, team collaboration, feature branching, code reviews, and CI/CD integration.",
-    mcqs: [
-      { q: "Which command creates a new Git branch?", options: ["git new", "git branch", "git checkout -b", "Both B and C"], answer: 3 },
-      { q: "What does 'git rebase' do?", options: ["Merges branches", "Moves commits to new base", "Deletes branch", "Stashes changes"], answer: 1 },
-      { q: "Which file tells Git which files to ignore?", options: [".gitconfig", ".gitignore", ".gitkeep", ".gitmodules"], answer: 1 },
-      { q: "What does 'git stash' do?", options: ["Deletes changes", "Temporarily saves uncommitted changes", "Commits changes", "Pushes to remote"], answer: 1 },
-    ]
-  },
-  {
-    id: 7,
-    name: "Prometheus",
-    icon: "🔥",
-    category: "Monitoring",
-    color: "#e6522c",
-    description: "Prometheus is an open-source monitoring and alerting toolkit that collects metrics from configured targets at given intervals and stores them as time-series data.",
-    usage: "Infrastructure monitoring, application metrics collection, alerting on anomalies, and integration with Grafana dashboards.",
-    mcqs: [
-      { q: "What data model does Prometheus use?", options: ["Relational", "Document", "Time-series", "Graph"], answer: 2 },
-      { q: "What query language does Prometheus use?", options: ["SQL", "PromQL", "NRQL", "LogQL"], answer: 1 },
-      { q: "What is the default Prometheus port?", options: ["3000", "9090", "8080", "5000"], answer: 1 },
-      { q: "What component handles alert routing in Prometheus?", options: ["Pushgateway", "AlertManager", "Grafana", "Node Exporter"], answer: 1 },
-    ]
-  },
-  {
-    id: 8,
-    name: "AWS",
-    icon: "☁️",
-    category: "Cloud Platform",
-    color: "#ff9900",
-    description: "Amazon Web Services is the world's leading cloud platform offering 200+ services including compute, storage, databases, networking, AI/ML, and DevOps tools.",
-    usage: "Hosting applications, managing scalable infrastructure, serverless computing, storage, and cloud-native DevOps pipelines.",
-    mcqs: [
-      { q: "Which AWS service is used for container orchestration?", options: ["EC2", "ECS/EKS", "Lambda", "S3"], answer: 1 },
-      { q: "What does AWS IAM stand for?", options: ["Internet Access Manager", "Identity and Access Management", "Internal Admin Module", "Instance Access Monitor"], answer: 1 },
-      { q: "Which service provides serverless compute on AWS?", options: ["EC2", "ECS", "Lambda", "Fargate"], answer: 2 },
-      { q: "What AWS service is used for object storage?", options: ["EBS", "EFS", "S3", "Glacier"], answer: 2 },
-    ]
-  },
-];
-
-export default function App() {
-  const [activeTool, setActiveTool] = useState(null);
-  const [mcqMode, setMcqMode] = useState(false);
-  const [currentQ, setCurrentQ] = useState(0);
-  const [selected, setSelected] = useState(null);
-  const [score, setScore] = useState(0);
-  const [finished, setFinished] = useState(false);
-  const [filter, setFilter] = useState("All");
-
-  const categories = ["All", ...new Set(devopsTools.map(t => t.category))];
-  const filtered = filter === "All" ? devopsTools : devopsTools.filter(t => t.category === filter);
-
-  const openTool = (tool) => {
-    setActiveTool(tool);
-    setMcqMode(false);
-    setCurrentQ(0);
-    setSelected(null);
-    setScore(0);
-    setFinished(false);
-  };
-
-  const startMCQ = () => {
-    setMcqMode(true);
-    setCurrentQ(0);
-    setSelected(null);
-    setScore(0);
-    setFinished(false);
-  };
-
-  const handleAnswer = (idx) => {
-    if (selected !== null) return;
-    setSelected(idx);
-    if (idx === activeTool.mcqs[currentQ].answer) setScore(s => s + 1);
-  };
-
-  const nextQ = () => {
-    if (currentQ + 1 < activeTool.mcqs.length) {
-      setCurrentQ(q => q + 1);
-      setSelected(null);
-    } else {
-      setFinished(true);
-    }
-  };
-
-  return (
-    <div style={{
-      minHeight: "100vh",
-      background: "#0a0e1a",
-      fontFamily: "'Courier New', monospace",
-      color: "#e0e6f0",
-      overflowX: "hidden"
-    }}>
-      {/* Animated grid background */}
-      <div style={{
-        position: "fixed", inset: 0, zIndex: 0,
-        backgroundImage: `linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px)`,
-        backgroundSize: "40px 40px",
-        pointerEvents: "none"
-      }}/>
-
-      {/* Header */}
-      <header style={{
-        position: "relative", zIndex: 10,
-        background: "linear-gradient(135deg, #0d1b2a 0%, #1a0a2e 100%)",
-        borderBottom: "1px solid rgba(0,200,255,0.15)",
-        padding: "0"
-      }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "28px 24px 24px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
-            <div style={{
-              width: 72, height: 72, borderRadius: "50%",
-              background: "linear-gradient(135deg, #00c8ff, #7c3aed)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 30, flexShrink: 0,
-              boxShadow: "0 0 24px rgba(0,200,255,0.4)"
-            }}>👨‍💻</div>
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                <h1 style={{
-                  margin: 0, fontSize: "clamp(1.4rem,4vw,2rem)",
-                  fontFamily: "'Georgia', serif",
-                  background: "linear-gradient(90deg, #00c8ff, #a78bfa)",
-                  WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent"
-                }}>Krishna</h1>
-                <span style={{
-                  background: "rgba(0,200,255,0.12)", border: "1px solid rgba(0,200,255,0.3)",
-                  color: "#00c8ff", padding: "2px 10px", borderRadius: 4,
-                  fontSize: 11, letterSpacing: 2, textTransform: "uppercase"
-                }}>DevOps Trainer</span>
-              </div>
-              <p style={{ margin: "4px 0 0", color: "#94a3b8", fontSize: 14 }}>
-                🏫 PythonLife Academy &nbsp;|&nbsp; 10+ Real-World Projects &nbsp;|&nbsp;
-                <a href="https://github.com/Milky19" target="_blank" rel="noopener noreferrer"
-                  style={{ color: "#a78bfa", textDecoration: "none" }}>⭐ github/Milky19</a>
-              </p>
-            </div>
-            <div style={{ marginLeft: "auto", display: "flex", gap: 12, flexWrap: "wrap" }}>
-              {[["10+","Projects"],["8","Tools"],["100%","Hands-on"]].map(([n,l]) => (
-                <div key={l} style={{
-                  textAlign: "center",
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  borderRadius: 8, padding: "10px 16px"
-                }}>
-                  <div style={{ fontSize: 20, fontWeight: 700, color: "#00c8ff" }}>{n}</div>
-                  <div style={{ fontSize: 11, color: "#64748b", letterSpacing: 1 }}>{l}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Filter Bar */}
-      <div style={{
-        position: "relative", zIndex: 10,
-        maxWidth: 1100, margin: "0 auto",
-        padding: "20px 24px 0",
-        display: "flex", gap: 8, flexWrap: "wrap"
-      }}>
-        {categories.map(cat => (
-          <button key={cat} onClick={() => setFilter(cat)} style={{
-            padding: "6px 16px", borderRadius: 20, border: "1px solid",
-            borderColor: filter === cat ? "#00c8ff" : "rgba(255,255,255,0.1)",
-            background: filter === cat ? "rgba(0,200,255,0.12)" : "transparent",
-            color: filter === cat ? "#00c8ff" : "#64748b",
-            fontSize: 12, cursor: "pointer", letterSpacing: 1,
-            transition: "all 0.2s"
-          }}>{cat}</button>
-        ))}
-      </div>
-
-      {/* Tools Grid */}
-      <main style={{
-        position: "relative", zIndex: 10,
-        maxWidth: 1100, margin: "0 auto",
-        padding: "24px",
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-        gap: 16
-      }}>
-        {filtered.map(tool => (
-          <div key={tool.id} onClick={() => openTool(tool)} style={{
-            background: "linear-gradient(135deg, rgba(13,27,42,0.9), rgba(26,10,46,0.7))",
-            border: `1px solid rgba(${tool.color.replace('#','').match(/.{2}/g).map(h=>parseInt(h,16)).join(',')},0.25)`,
-            borderRadius: 12, padding: "20px",
-            cursor: "pointer",
-            transition: "all 0.25s",
-            position: "relative", overflow: "hidden"
-          }}
-            onMouseEnter={e => {
-              e.currentTarget.style.transform = "translateY(-4px)";
-              e.currentTarget.style.boxShadow = `0 12px 32px rgba(0,0,0,0.4), 0 0 20px ${tool.color}22`;
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "none";
-            }}
-          >
-            <div style={{
-              position: "absolute", top: 0, right: 0,
-              width: 80, height: 80, borderRadius: "0 12px 0 80px",
-              background: `${tool.color}15`
-            }}/>
-            <div style={{ fontSize: 32, marginBottom: 10 }}>{tool.icon}</div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-              <h3 style={{ margin: 0, fontSize: 16, color: "#f1f5f9" }}>{tool.name}</h3>
-            </div>
-            <span style={{
-              fontSize: 10, letterSpacing: 1.5, textTransform: "uppercase",
-              color: tool.color, background: `${tool.color}18`,
-              padding: "2px 8px", borderRadius: 3
-            }}>{tool.category}</span>
-            <p style={{ margin: "12px 0 0", fontSize: 12, color: "#64748b", lineHeight: 1.6 }}>
-              {tool.description.slice(0, 80)}...
-            </p>
-            <div style={{
-              marginTop: 14, fontSize: 11, color: "#00c8ff",
-              display: "flex", alignItems: "center", gap: 4
-            }}>Click to explore + MCQ →</div>
-          </div>
-        ))}
-      </main>
-
-      {/* Modal */}
-      {activeTool && (
-        <div style={{
-          position: "fixed", inset: 0, zIndex: 100,
-          background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          padding: 16
-        }} onClick={e => { if (e.target === e.currentTarget) setActiveTool(null); }}>
-          <div style={{
-            background: "linear-gradient(135deg, #0d1b2a, #1a0a2e)",
-            border: `1px solid ${activeTool.color}44`,
-            borderRadius: 16, padding: "32px",
-            width: "100%", maxWidth: 560,
-            maxHeight: "90vh", overflowY: "auto",
-            boxShadow: `0 32px 80px rgba(0,0,0,0.6), 0 0 40px ${activeTool.color}22`,
-            position: "relative"
-          }}>
-            <button onClick={() => setActiveTool(null)} style={{
-              position: "absolute", top: 16, right: 16,
-              background: "rgba(255,255,255,0.06)", border: "none",
-              color: "#94a3b8", width: 32, height: 32, borderRadius: "50%",
-              cursor: "pointer", fontSize: 16
-            }}>×</button>
-
-            {!mcqMode ? (
-              <>
-                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
-                  <span style={{ fontSize: 44 }}>{activeTool.icon}</span>
-                  <div>
-                    <h2 style={{ margin: 0, fontSize: 22, color: "#f1f5f9" }}>{activeTool.name}</h2>
-                    <span style={{
-                      fontSize: 10, letterSpacing: 2, textTransform: "uppercase",
-                      color: activeTool.color
-                    }}>{activeTool.category}</span>
-                  </div>
-                </div>
-
-                <div style={{
-                  background: "rgba(255,255,255,0.03)", borderRadius: 10,
-                  padding: 16, marginBottom: 14,
-                  borderLeft: `3px solid ${activeTool.color}`
-                }}>
-                  <div style={{ fontSize: 11, color: "#64748b", letterSpacing: 1, marginBottom: 8, textTransform: "uppercase" }}>📖 Description</div>
-                  <p style={{ margin: 0, fontSize: 13, color: "#cbd5e1", lineHeight: 1.8 }}>{activeTool.description}</p>
-                </div>
-
-                <div style={{
-                  background: "rgba(255,255,255,0.03)", borderRadius: 10,
-                  padding: 16, marginBottom: 24,
-                  borderLeft: `3px solid #a78bfa`
-                }}>
-                  <div style={{ fontSize: 11, color: "#64748b", letterSpacing: 1, marginBottom: 8, textTransform: "uppercase" }}>🛠️ Usage</div>
-                  <p style={{ margin: 0, fontSize: 13, color: "#cbd5e1", lineHeight: 1.8 }}>{activeTool.usage}</p>
-                </div>
-
-                <button onClick={startMCQ} style={{
-                  width: "100%", padding: "14px",
-                  background: `linear-gradient(135deg, ${activeTool.color}cc, #7c3aed)`,
-                  border: "none", borderRadius: 10, color: "#fff",
-                  fontSize: 14, fontWeight: 700, cursor: "pointer",
-                  letterSpacing: 1, fontFamily: "inherit",
-                  boxShadow: `0 8px 24px ${activeTool.color}44`
-                }}>🧠 Start MCQ Quiz ({activeTool.mcqs.length} Questions)</button>
-              </>
-            ) : !finished ? (
-              <>
-                <div style={{ marginBottom: 20 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                    <span style={{ fontSize: 13, color: "#64748b" }}>{activeTool.icon} {activeTool.name} Quiz</span>
-                    <span style={{
-                      fontSize: 11, padding: "4px 12px", borderRadius: 20,
-                      background: "rgba(0,200,255,0.1)", color: "#00c8ff", border: "1px solid rgba(0,200,255,0.2)"
-                    }}>Q {currentQ + 1} / {activeTool.mcqs.length}</span>
-                  </div>
-                  <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: 4, height: 4, marginBottom: 20 }}>
-                    <div style={{
-                      height: "100%", borderRadius: 4,
-                      background: `linear-gradient(90deg, ${activeTool.color}, #7c3aed)`,
-                      width: `${((currentQ + 1) / activeTool.mcqs.length) * 100}%`,
-                      transition: "width 0.4s"
-                    }}/>
-                  </div>
-                  <h3 style={{ margin: "0 0 20px", fontSize: 15, color: "#f1f5f9", lineHeight: 1.6 }}>
-                    {activeTool.mcqs[currentQ].q}
-                  </h3>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    {activeTool.mcqs[currentQ].options.map((opt, idx) => {
-                      let bg = "rgba(255,255,255,0.04)";
-                      let border = "rgba(255,255,255,0.1)";
-                      let color = "#cbd5e1";
-                      if (selected !== null) {
-                        if (idx === activeTool.mcqs[currentQ].answer) { bg = "rgba(34,197,94,0.15)"; border = "#22c55e"; color = "#22c55e"; }
-                        else if (idx === selected) { bg = "rgba(239,68,68,0.15)"; border = "#ef4444"; color = "#ef4444"; }
-                      }
-                      return (
-                        <button key={idx} onClick={() => handleAnswer(idx)} style={{
-                          background: bg, border: `1px solid ${border}`,
-                          borderRadius: 8, padding: "12px 16px", color,
-                          textAlign: "left", cursor: selected !== null ? "default" : "pointer",
-                          fontSize: 13, fontFamily: "inherit", transition: "all 0.2s",
-                          display: "flex", gap: 10, alignItems: "center"
-                        }}>
-                          <span style={{
-                            width: 22, height: 22, borderRadius: "50%",
-                            background: "rgba(255,255,255,0.06)", border: `1px solid ${border}`,
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            fontSize: 11, flexShrink: 0, color
-                          }}>{["A","B","C","D"][idx]}</span>
-                          {opt}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-                {selected !== null && (
-                  <button onClick={nextQ} style={{
-                    width: "100%", padding: "12px",
-                    background: "linear-gradient(135deg, #7c3aed, #00c8ff)",
-                    border: "none", borderRadius: 10, color: "#fff",
-                    fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit"
-                  }}>{currentQ + 1 < activeTool.mcqs.length ? "Next Question →" : "See Results 🎯"}</button>
-                )}
-              </>
-            ) : (
-              <div style={{ textAlign: "center", padding: "20px 0" }}>
-                <div style={{ fontSize: 64, marginBottom: 16 }}>
-                  {score === activeTool.mcqs.length ? "🏆" : score >= activeTool.mcqs.length / 2 ? "🎉" : "📚"}
-                </div>
-                <h2 style={{ margin: "0 0 8px", fontSize: 24, color: "#f1f5f9" }}>
-                  {score}/{activeTool.mcqs.length}
-                </h2>
-                <p style={{ color: "#64748b", marginBottom: 24, fontSize: 14 }}>
-                  {score === activeTool.mcqs.length ? "Perfect Score! You're a pro!" : score >= activeTool.mcqs.length / 2 ? "Good job! Keep practicing." : "Keep learning with Krishna's course!"}
-                </p>
-                <div style={{ display: "flex", gap: 10 }}>
-                  <button onClick={startMCQ} style={{
-                    flex: 1, padding: "12px",
-                    background: `rgba(${activeTool.color.replace('#','').match(/.{2}/g).map(h=>parseInt(h,16)).join(',')},0.15)`,
-                    border: `1px solid ${activeTool.color}`,
-                    borderRadius: 10, color: activeTool.color,
-                    cursor: "pointer", fontFamily: "inherit", fontSize: 13
-                  }}>🔄 Retry</button>
-                  <button onClick={() => setMcqMode(false)} style={{
-                    flex: 1, padding: "12px",
-                    background: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    borderRadius: 10, color: "#94a3b8",
-                    cursor: "pointer", fontFamily: "inherit", fontSize: 13
-                  }}>← Back to Tool</button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">KRISH<span>NA</span></div>
+    <div class="nav-links">
+      <a href="#skills">Skills</a>
+      <a href="#projects">Projects</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
     </div>
-  );
-}
+    <div class="nav-status"><div class="status-dot"></div>Available for Training</div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-badge">DevOps Trainer · PythonLife Academy</div>
+      <h1 class="hero-name">KRISH<span class="accent">NA</span></h1>
+      <p class="hero-role">Building <strong>Cloud-Native Engineers</strong> with Real-World DevOps</p>
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="t-dot r"></div><div class="t-dot y"></div><div class="t-dot g"></div>
+          <span class="terminal-bar-title">krishna@pythonlife ~ </span>
+        </div>
+        <div class="terminal-body">
+          <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd"> whoami</span></div>
+          <div class="t-out">DevOps Trainer · AWS Cloud Specialist</div>
+          <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd"> cat skills.txt</span></div>
+          <div class="t-out"><span>Docker</span> · <span>K8s</span> · <span>Jenkins</span> · <span>Terraform</span> · <span>AWS</span></div>
+          <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd"> ls projects/</span></div>
+          <div class="t-out"><span>10+ real-time production projects</span></div>
+          <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd"> echo $LOCATION</span></div>
+          <div class="t-out"><span>PythonLife Academy</span> <span class="cursor"></span></div>
+        </div>
+      </div>
+      <div class="hero-cta">
+        <a href="#projects" class="btn btn-primary">View Projects →</a>
+        <a href="https://github.com/milk19" target="_blank" class="btn btn-ghost">⭐ github/milk19</a>
+      </div>
+      <div class="hero-stats">
+        <div><div class="stat-num">10+</div><div class="stat-label">Real Projects</div></div>
+        <div><div class="stat-num">8+</div><div class="stat-label">DevOps Tools</div></div>
+        <div><div class="stat-num">100%</div><div class="stat-label">Hands-On</div></div>
+        <div><div class="stat-num">AWS</div><div class="stat-label">Cloud Focus</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="skills">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-tag">skills</div>
+      <h2 class="section-title">DevOps Toolchain</h2>
+    </div>
+    <div class="tools-grid">
+      <div class="tool-card reveal" style="--tool-color:#0db7ed"><div class="tool-icon">🐳</div><div class="tool-name">Docker</div><div class="tool-cat">Containerization</div><div class="tool-bar"><div class="tool-bar-fill" data-w="92" style="background:#0db7ed"></div></div></div>
+      <div class="tool-card reveal" style="--tool-color:#326ce5"><div class="tool-icon">☸️</div><div class="tool-name">Kubernetes</div><div class="tool-cat">Orchestration</div><div class="tool-bar"><div class="tool-bar-fill" data-w="85" style="background:#326ce5"></div></div></div>
+      <div class="tool-card reveal" style="--tool-color:#FF9900"><div class="tool-icon">☁️</div><div class="tool-name">AWS Cloud</div><div class="tool-cat">Cloud Platform</div><div class="tool-bar"><div class="tool-bar-fill" data-w="95" style="background:#FF9900"></div></div></div>
+      <div class="tool-card reveal" style="--tool-color:#d33833"><div class="tool-icon">🏗️</div><div class="tool-name">Jenkins</div><div class="tool-cat">CI/CD</div><div class="tool-bar"><div class="tool-bar-fill" data-w="90" style="background:#d33833"></div></div></div>
+      <div class="tool-card reveal" style="--tool-color:#7b42bc"><div class="tool-icon">🏔️</div><div class="tool-name">Terraform</div><div class="tool-cat">Infrastructure as Code</div><div class="tool-bar"><div class="tool-bar-fill" data-w="88" style="background:#7b42bc"></div></div></div>
+      <div class="tool-card reveal" style="--tool-color:#ee0000"><div class="tool-icon">⚙️</div><div class="tool-name">Ansible</div><div class="tool-cat">Config Management</div><div class="tool-bar"><div class="tool-bar-fill" data-w="82" style="background:#ee0000"></div></div></div>
+      <div class="tool-card reveal" style="--tool-color:#f05032"><div class="tool-icon">🌿</div><div class="tool-name">Git & GitHub</div><div class="tool-cat">Version Control</div><div class="tool-bar"><div class="tool-bar-fill" data-w="96" style="background:#f05032"></div></div></div>
+      <div class="tool-card reveal" style="--tool-color:#e6522c"><div class="tool-icon">🔥</div><div class="tool-name">Prometheus + Grafana</div><div class="tool-cat">Monitoring</div><div class="tool-bar"><div class="tool-bar-fill" data-w="80" style="background:#e6522c"></div></div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="projects">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-tag">projects</div>
+      <h2 class="section-title">Real-World Projects</h2>
+    </div>
+    <div class="projects-grid">
+      <div class="project-card reveal"><div class="project-num">PROJECT_01</div><div class="project-title">Containerized Microservices on AWS EKS</div><div class="project-desc">Deployed a production-grade microservices app using Docker + Kubernetes on AWS EKS with auto-scaling and load balancing.</div><div class="project-tags"><span class="tag">Docker</span><span class="tag">Kubernetes</span><span class="tag blue">AWS EKS</span></div></div>
+      <div class="project-card reveal"><div class="project-num">PROJECT_02</div><div class="project-title">CI/CD Pipeline with Jenkins + GitHub</div><div class="project-desc">End-to-end automated pipeline — code push triggers build, test, Docker image build, and deploy to EC2 via Jenkins.</div><div class="project-tags"><span class="tag">Jenkins</span><span class="tag">GitHub</span><span class="tag blue">AWS EC2</span></div></div>
+      <div class="project-card reveal"><div class="project-num">PROJECT_03</div><div class="project-title">AWS Infrastructure with Terraform</div><div class="project-desc">Provisioned VPC, subnets, EC2, RDS, and S3 from scratch using Terraform with remote state on S3 + DynamoDB locking.</div><div class="project-tags"><span class="tag">Terraform</span><span class="tag blue">AWS VPC</span><span class="tag blue">S3</span></div></div>
+      <div class="project-card reveal"><div class="project-num">PROJECT_04</div><div class="project-title">Server Config Automation with Ansible</div><div class="project-desc">Automated provisioning of 20+ servers with Nginx, Java, Docker installation using Ansible playbooks and roles.</div><div class="project-tags"><span class="tag">Ansible</span><span class="tag blue">AWS EC2</span><span class="tag">Linux</span></div></div>
+      <div class="project-card reveal"><div class="project-num">PROJECT_05</div><div class="project-title">Monitoring Stack: Prometheus + Grafana</div><div class="project-desc">Set up full observability stack with custom dashboards, alerting rules, and Node Exporter on Kubernetes cluster.</div><div class="project-tags"><span class="tag">Prometheus</span><span class="tag">Grafana</span><span class="tag blue">AWS EKS</span></div></div>
+      <div class="project-card reveal"><div class="project-num">PROJECT_06</div><div class="project-title">Serverless App on AWS Lambda + API GW</div><div class="project-desc">Built and deployed a serverless REST API using AWS Lambda, API Gateway, DynamoDB, and managed with SAM CLI.</div><div class="project-tags"><span class="tag blue">Lambda</span><span class="tag blue">API Gateway</span><span class="tag blue">DynamoDB</span></div></div>
+      <div class="project-card reveal"><div class="project-num">PROJECT_07</div><div class="project-title">GitOps Workflow with ArgoCD</div><div class="project-desc">Implemented GitOps using ArgoCD on EKS — every Git commit auto-syncs to Kubernetes cluster state.</div><div class="project-tags"><span class="tag">ArgoCD</span><span class="tag">GitOps</span><span class="tag blue">AWS EKS</span></div></div>
+      <div class="project-card reveal"><div class="project-num">PROJECT_08+</div><div class="project-title">More Projects on GitHub ⭐</div><div class="project-desc">Explore additional projects: multi-cloud deployments, Helm charts, SonarQube integration, and more on GitHub.</div><div class="project-tags"><span class="tag">Helm</span><span class="tag">SonarQube</span><span class="tag blue">Multi-Cloud</span></div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-text reveal">
+        <div class="section-tag">about</div>
+        <h2 class="section-title" style="margin-bottom:24px">Who I Am</h2>
+        <p>I'm <strong>Krishna</strong>, a DevOps Trainer at <strong>PythonLife Academy</strong> with a passion for making cloud and DevOps accessible through real, production-grade hands-on projects.</p>
+        <p>I teach students how to build, ship, and monitor applications using the same tools that top tech companies use — <strong>Docker, Kubernetes, AWS, Terraform, Jenkins</strong>, and more.</p>
+        <p>No slides-only theory. Every concept is backed by a <strong>real-world project</strong> you can show in your portfolio.</p>
+        <a href="https://github.com/milk19" target="_blank" class="btn btn-primary" style="margin-top:8px">View GitHub →</a>
+      </div>
+      <div class="reveal">
+        <div class="about-card">
+          <div class="about-card-title">// profile.json</div>
+          <div class="about-item"><div class="about-item-icon">👨‍💻</div><div><div class="about-item-label">Role</div><div class="about-item-value">DevOps Trainer</div></div></div>
+          <div class="about-item"><div class="about-item-icon">🏫</div><div><div class="about-item-label">Organization</div><div class="about-item-value">PythonLife Academy</div></div></div>
+          <div class="about-item"><div class="about-item-icon">☁️</div><div><div class="about-item-label">Specialization</div><div class="about-item-value">AWS Cloud + DevOps</div></div></div>
+          <div class="about-item"><div class="about-item-icon">🚀</div><div><div class="about-item-label">Projects Taught</div><div class="about-item-value">10+ Real-Time Projects</div></div></div>
+          <div class="about-item"><div class="about-item-icon">🐙</div><div><div class="about-item-label">GitHub</div><div class="about-item-value"><a href="https://github.com/milk19" target="_blank" style="color:#00d4ff;text-decoration:none">github.com/milk19</a></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="contact">
+  <div class="container">
+    <div class="contact-box reveal">
+      <h3>Let's Build Together</h3>
+      <p>Interested in DevOps training, collaboration, or a real-time project?</p>
+      <div class="contact-links">
+        <a href="https://github.com/milk19" target="_blank" class="contact-link">🐙 github/milk19</a>
+        <a href="mailto:krishna@pythonlife.in" class="contact-link">✉️ krishna@pythonlife.in</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <span>KRISHNA</span> · DevOps Trainer · PythonLife Academy · Built with ❤️ &amp; AWS ☁️
+  </div>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  const barObserver = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if(e.isIntersecting) {
+        const fill = e.target.querySelector('.tool-bar-fill');
+        if(fill) fill.style.width = fill.dataset.w + '%';
+      }
+    });
+  }, { threshold: 0.3 });
+  document.querySelectorAll('.tool-card').forEach(el => barObserver.observe(el));
+</script>
+</body>
+</html>
