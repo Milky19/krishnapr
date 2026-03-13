@@ -1,282 +1,1117 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Krishna | DevOps Trainer @ PythonLife</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700;800&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
-<style>
-  :root {
-    --aws: #FF9900;
-    --aws-dark: #e07b00;
-    --green: #00ff88;
-    --blue: #00d4ff;
-    --bg: #080c10;
-    --surface: #0e1419;
-    --surface2: #141c24;
-    --border: rgba(255,153,0,0.15);
-    --text: #c9d1d9;
-    --muted: #4a5568;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  body { background: var(--bg); color: var(--text); font-family: 'JetBrains Mono', monospace; overflow-x: hidden; cursor: crosshair; }
-  body::before { content: ''; position: fixed; inset: 0; z-index: 9999; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px); pointer-events: none; }
-  .bg-grid { position: fixed; inset: 0; z-index: 0; background-image: linear-gradient(rgba(255,153,0,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,153,0,0.04) 1px, transparent 1px); background-size: 60px 60px; animation: gridShift 20s linear infinite; }
-  @keyframes gridShift { 0%{background-position:0 0} 100%{background-position:60px 60px} }
-  .orb { position: fixed; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0; }
-  .orb-1 { width: 500px; height: 500px; background: rgba(255,153,0,0.06); top: -200px; right: -100px; }
-  .orb-2 { width: 400px; height: 400px; background: rgba(0,212,255,0.05); bottom: 10%; left: -150px; }
-  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
-  nav { position: fixed; top: 0; width: 100%; z-index: 100; background: rgba(8,12,16,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 0 24px; }
-  .nav-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 56px; }
-  .nav-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; color: var(--aws); letter-spacing: -0.5px; }
-  .nav-logo span { color: var(--text); }
-  .nav-links { display: flex; gap: 28px; }
-  .nav-links a { color: var(--muted); text-decoration: none; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; transition: color 0.2s; }
-  .nav-links a:hover { color: var(--aws); }
-  .nav-status { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--green); }
-  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: blink 2s ease-in-out infinite; }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-  .hero { min-height: 100vh; display: flex; align-items: center; padding: 100px 0 60px; }
-  .hero-content { max-width: 700px; }
-  .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,153,0,0.08); border: 1px solid rgba(255,153,0,0.25); border-radius: 4px; padding: 6px 14px; margin-bottom: 28px; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--aws); }
-  .hero-badge::before { content: '▶'; font-size: 8px; }
-  .hero-name { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(3rem,8vw,5.5rem); line-height: 0.95; letter-spacing: -3px; color: #fff; margin-bottom: 4px; }
-  .hero-name .accent { color: var(--aws); }
-  .hero-role { font-family: 'Syne', sans-serif; font-size: clamp(1rem,2.5vw,1.3rem); color: var(--muted); font-weight: 400; letter-spacing: 1px; margin-bottom: 28px; }
-  .hero-role strong { color: var(--blue); font-weight: 400; }
-  .terminal { background: var(--surface); border: 1px solid rgba(255,153,0,0.2); border-radius: 8px; overflow: hidden; margin-bottom: 36px; max-width: 520px; }
-  .terminal-bar { background: var(--surface2); padding: 10px 16px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-  .t-dot { width: 10px; height: 10px; border-radius: 50%; }
-  .t-dot.r { background: #ff5f57; } .t-dot.y { background: #febc2e; } .t-dot.g { background: #28c840; }
-  .terminal-bar-title { margin-left: 8px; font-size: 11px; color: var(--muted); }
-  .terminal-body { padding: 20px; font-size: 12.5px; line-height: 2; }
-  .t-line { display: flex; gap: 8px; }
-  .t-prompt { color: var(--aws); flex-shrink: 0; }
-  .t-cmd { color: var(--green); }
-  .t-out { color: var(--text); padding-left: 16px; }
-  .t-out span { color: var(--blue); }
-  .cursor { display: inline-block; width: 8px; height: 14px; background: var(--green); vertical-align: middle; margin-left: 2px; animation: cursorBlink 1s step-end infinite; }
-  @keyframes cursorBlink { 0%,100%{opacity:1} 50%{opacity:0} }
-  .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
-  .btn { padding: 12px 24px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; text-decoration: none; display: inline-block; transition: all 0.2s; }
-  .btn-primary { background: var(--aws); color: #000; border: none; box-shadow: 0 4px 20px rgba(255,153,0,0.3); }
-  .btn-primary:hover { background: var(--aws-dark); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(255,153,0,0.4); }
-  .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
-  .btn-ghost:hover { border-color: var(--aws); color: var(--aws); transform: translateY(-2px); }
-  .hero-stats { display: flex; gap: 32px; margin-top: 48px; padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.05); flex-wrap: wrap; }
-  .stat-num { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: var(--aws); line-height: 1; }
-  .stat-label { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
-  section { padding: 80px 0; }
-  .section-header { margin-bottom: 48px; }
-  .section-tag { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--aws); margin-bottom: 12px; }
-  .section-tag::before { content: '// '; color: var(--muted); }
-  .section-title { font-family: 'Syne', sans-serif; font-size: clamp(1.8rem,4vw,2.8rem); font-weight: 800; color: #fff; letter-spacing: -1px; line-height: 1.1; }
-  .tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
-  .tool-card { background: var(--surface); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 20px; transition: all 0.25s; position: relative; overflow: hidden; }
-  .tool-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--tool-color, var(--aws)); opacity: 0; transition: opacity 0.25s; }
-  .tool-card:hover { border-color: rgba(255,153,0,0.25); transform: translateY(-3px); background: var(--surface2); }
-  .tool-card:hover::before { opacity: 1; }
-  .tool-icon { font-size: 28px; margin-bottom: 12px; }
-  .tool-name { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 4px; }
-  .tool-cat { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
-  .tool-bar { margin-top: 14px; height: 3px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; }
-  .tool-bar-fill { height: 100%; border-radius: 2px; width: 0; transition: width 1.2s cubic-bezier(0.4,0,0.2,1); }
-  .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
-  .project-card { background: var(--surface); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 24px; transition: all 0.25s; }
-  .project-card:hover { border-color: rgba(255,153,0,0.3); transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 24px rgba(255,153,0,0.08); }
-  .project-num { font-size: 11px; color: var(--aws); letter-spacing: 2px; margin-bottom: 10px; }
-  .project-title { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 10px; line-height: 1.3; }
-  .project-desc { font-size: 12px; color: var(--muted); line-height: 1.7; margin-bottom: 16px; }
-  .project-tags { display: flex; gap: 6px; flex-wrap: wrap; }
-  .tag { padding: 3px 9px; border-radius: 3px; font-size: 10px; letter-spacing: 1px; background: rgba(255,153,0,0.08); border: 1px solid rgba(255,153,0,0.15); color: var(--aws); }
-  .tag.blue { background: rgba(0,212,255,0.08); border-color: rgba(0,212,255,0.15); color: var(--blue); }
-  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
-  @media(max-width:700px){.about-grid{grid-template-columns:1fr}}
-  .about-text p { font-size: 13px; color: var(--muted); line-height: 2; margin-bottom: 16px; }
-  .about-text p strong { color: var(--text); }
-  .about-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 28px; }
-  .about-card-title { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--aws); margin-bottom: 20px; }
-  .about-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
-  .about-item:last-child { border-bottom: none; padding-bottom: 0; }
-  .about-item-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
-  .about-item-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
-  .about-item-value { font-size: 13px; color: #fff; margin-top: 2px; }
-  .contact-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 48px; text-align: center; position: relative; overflow: hidden; }
-  .contact-box::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(255,153,0,0.05) 0%, transparent 70%); pointer-events: none; }
-  .contact-box h3 { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: #fff; margin-bottom: 12px; letter-spacing: -1px; }
-  .contact-box p { font-size: 13px; color: var(--muted); margin-bottom: 32px; }
-  .contact-links { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-  .contact-link { display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; border-radius: 6px; font-size: 12px; font-family: 'JetBrains Mono', monospace; text-decoration: none; transition: all 0.2s; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text); }
-  .contact-link:hover { border-color: var(--aws); color: var(--aws); transform: translateY(-2px); }
-  footer { border-top: 1px solid rgba(255,255,255,0.05); padding: 28px 0; text-align: center; font-size: 11px; color: var(--muted); }
-  footer span { color: var(--aws); }
-  .divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(255,153,0,0.15), transparent); }
-  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
-  .reveal.visible { opacity: 1; transform: translateY(0); }
-  @media(max-width:600px){ .nav-links{display:none} .hero-stats{gap:20px} .tools-grid{grid-template-columns:repeat(2,1fr)} .projects-grid{grid-template-columns:1fr} .contact-box{padding:28px 20px} }
-</style>
-</head>
-<body>
-<div class="bg-grid"></div>
-<div class="orb orb-1"></div>
-<div class="orb orb-2"></div>
+import { useState, useEffect } from "react";
 
-<nav>
-  <div class="nav-inner">
-    <div class="nav-logo">KRISH<span>NA</span></div>
-    <div class="nav-links">
-      <a href="#skills">Skills</a>
-      <a href="#projects">Projects</a>
-      <a href="#about">About</a>
-      <a href="#contact">Contact</a>
-    </div>
-    <div class="nav-status"><div class="status-dot"></div>Available for Training</div>
-  </div>
-</nav>
+// ─── DATA ────────────────────────────────────────────────────────────────────
+const devopsTools = [
+  {
+    id: 1, name: "Docker", icon: "🐳", category: "Containerization", color: "#0db7ed",
+    description: "Docker packages applications and their dependencies into lightweight containers, ensuring consistency across environments from development to production.",
+    usage: "Build, ship, and run any app, anywhere. Used for microservices, CI/CD pipelines, and environment isolation.",
+    mcqs: [
+      { q: "What is the default Docker network driver?", options: ["bridge", "host", "overlay", "macvlan"], answer: 0 },
+      { q: "Which command builds a Docker image from a Dockerfile?", options: ["docker run", "docker build", "docker create", "docker start"], answer: 1 },
+      { q: "What file defines a multi-container Docker application?", options: ["Dockerfile", "docker-compose.yml", "docker.config", "container.yaml"], answer: 1 },
+      { q: "Which command lists all running containers?", options: ["docker images", "docker ps", "docker ls", "docker list"], answer: 1 },
+      { q: "Which instruction sets the base image in a Dockerfile?", options: ["BASE", "FROM", "IMAGE", "SOURCE"], answer: 1 },
+      { q: "What does the EXPOSE instruction in a Dockerfile do?", options: ["Opens a port on the host", "Documents the port the container listens on", "Binds container to host port", "Starts a service"], answer: 1 },
+      { q: "Which command removes all stopped containers?", options: ["docker rm all", "docker prune", "docker container prune", "docker clean"], answer: 2 },
+      { q: "What is a Docker volume primarily used for?", options: ["Networking between containers", "Persisting data beyond container lifecycle", "Scaling containers", "Setting environment variables"], answer: 1 },
+      { q: "Which command tags a Docker image?", options: ["docker label", "docker rename", "docker tag", "docker name"], answer: 2 },
+      { q: "What does 'docker exec -it <container> bash' do?", options: ["Starts a new container", "Opens interactive shell in running container", "Copies files to container", "Logs container output"], answer: 1 },
+    ]
+  },
+  {
+    id: 2, name: "Kubernetes", icon: "☸️", category: "Orchestration", color: "#326ce5",
+    description: "Kubernetes (K8s) is an open-source container orchestration platform that automates deployment, scaling, and management of containerized applications.",
+    usage: "Managing container clusters at scale, auto-healing, load balancing, rolling updates, and service discovery.",
+    mcqs: [
+      { q: "What is the smallest deployable unit in Kubernetes?", options: ["Container", "Pod", "Node", "Cluster"], answer: 1 },
+      { q: "Which component acts as the cluster's control plane API?", options: ["kubelet", "kube-proxy", "kube-apiserver", "etcd"], answer: 2 },
+      { q: "What Kubernetes object manages stateless application replicas?", options: ["StatefulSet", "DaemonSet", "Deployment", "Job"], answer: 2 },
+      { q: "Which command applies a configuration file to a cluster?", options: ["kubectl run", "kubectl apply", "kubectl create", "kubectl set"], answer: 1 },
+      { q: "What does a Kubernetes Service do?", options: ["Runs containers", "Stores secrets", "Exposes pods as a network service", "Schedules workloads"], answer: 2 },
+      { q: "Which object ensures one pod runs on every node?", options: ["Deployment", "ReplicaSet", "DaemonSet", "StatefulSet"], answer: 2 },
+      { q: "What stores cluster state in Kubernetes?", options: ["kubelet", "etcd", "kube-scheduler", "CoreDNS"], answer: 1 },
+      { q: "Which command scales a deployment to 5 replicas?", options: ["kubectl resize", "kubectl scale deployment my-app --replicas=5", "kubectl update replicas=5", "kubectl set replicas 5"], answer: 1 },
+      { q: "What is a Kubernetes Namespace used for?", options: ["Physical node isolation", "Logical cluster partitioning", "Container networking", "Volume management"], answer: 1 },
+      { q: "Which Kubernetes resource stores sensitive data like passwords?", options: ["ConfigMap", "Secret", "Volume", "Annotation"], answer: 1 },
+    ]
+  },
+  {
+    id: 3, name: "Jenkins", icon: "🏗️", category: "CI/CD", color: "#d33833",
+    description: "Jenkins is an open-source automation server that enables continuous integration and delivery by automating build, test, and deployment pipelines.",
+    usage: "Automating software build pipelines, running tests on every commit, and deploying applications automatically.",
+    mcqs: [
+      { q: "What file defines a Jenkins pipeline as code?", options: ["jenkins.yaml", "Jenkinsfile", "pipeline.groovy", "build.xml"], answer: 1 },
+      { q: "Which Jenkins feature allows parallel execution?", options: ["Stage", "Step", "Parallel", "Agent"], answer: 2 },
+      { q: "What is the Jenkins default port?", options: ["8080", "8443", "9090", "3000"], answer: 0 },
+      { q: "Which plugin integrates Jenkins with Git?", options: ["Maven Plugin", "Git Plugin", "Pipeline Plugin", "Slack Plugin"], answer: 1 },
+      { q: "What is a Jenkins 'Stage'?", options: ["A plugin category", "A logical section of a pipeline", "A build artifact", "A test report"], answer: 1 },
+      { q: "Which directive specifies where a Jenkins pipeline runs?", options: ["stage", "steps", "agent", "environment"], answer: 2 },
+      { q: "What is the purpose of Jenkins credentials?", options: ["Storing build logs", "Securely storing secrets and passwords", "Managing plugins", "Configuring nodes"], answer: 1 },
+      { q: "What does a Jenkins 'post' block do?", options: ["Sends a POST HTTP request", "Defines actions after pipeline stages", "Posts to Slack", "Uploads artifacts"], answer: 1 },
+      { q: "Which Jenkins pipeline type uses a visual editor?", options: ["Scripted Pipeline", "Declarative Pipeline", "Blue Ocean Pipeline", "Freestyle Job"], answer: 2 },
+      { q: "What does 'SCM Polling' in Jenkins do?", options: ["Scans code for vulnerabilities", "Periodically checks VCS for changes", "Polls agents for availability", "Monitors system resources"], answer: 1 },
+    ]
+  },
+  {
+    id: 4, name: "Terraform", icon: "🏔️", category: "IaC", color: "#7b42bc",
+    description: "Terraform is an Infrastructure as Code tool by HashiCorp that allows you to define and provision cloud infrastructure using declarative configuration files.",
+    usage: "Provisioning AWS, Azure, GCP resources, managing infrastructure lifecycle, and enabling GitOps workflows.",
+    mcqs: [
+      { q: "What language does Terraform use for configuration?", options: ["YAML", "JSON", "HCL", "XML"], answer: 2 },
+      { q: "Which command initializes a Terraform working directory?", options: ["terraform start", "terraform init", "terraform setup", "terraform begin"], answer: 1 },
+      { q: "What does 'terraform plan' do?", options: ["Applies changes", "Shows execution plan", "Destroys resources", "Validates syntax"], answer: 1 },
+      { q: "Which file stores Terraform state?", options: ["main.tf", "variables.tf", "terraform.tfstate", "outputs.tf"], answer: 2 },
+      { q: "What is a Terraform provider?", options: ["A state backend", "A plugin to interact with APIs/platforms", "A variable type", "A module registry"], answer: 1 },
+      { q: "Which command applies Terraform changes?", options: ["terraform run", "terraform deploy", "terraform apply", "terraform execute"], answer: 2 },
+      { q: "What is a Terraform module?", options: ["A provider configuration", "A reusable group of resources", "A state file", "A backend type"], answer: 1 },
+      { q: "Which backend allows Terraform state to be stored remotely?", options: ["local", "S3", "Both A and B", "Neither"], answer: 1 },
+      { q: "What does 'terraform destroy' do?", options: ["Removes state file", "Deletes all managed resources", "Undoes last apply", "Resets providers"], answer: 1 },
+      { q: "What is the purpose of 'terraform.tfvars'?", options: ["Define providers", "Store variable values", "Track state", "Define outputs"], answer: 1 },
+    ]
+  },
+  {
+    id: 5, name: "Ansible", icon: "⚙️", category: "Config Mgmt", color: "#ee0000",
+    description: "Ansible is an agentless automation tool that uses YAML-based playbooks to configure systems, deploy applications, and orchestrate complex IT tasks.",
+    usage: "Server configuration, application deployment, patch management, and automating repetitive IT operations.",
+    mcqs: [
+      { q: "What language are Ansible playbooks written in?", options: ["Python", "JSON", "YAML", "Ruby"], answer: 2 },
+      { q: "What is the Ansible inventory file used for?", options: ["Storing variables", "Defining target hosts", "Writing tasks", "Managing roles"], answer: 1 },
+      { q: "Which Ansible command runs a playbook?", options: ["ansible-run", "ansible-play", "ansible-playbook", "ansible-exec"], answer: 2 },
+      { q: "Ansible operates without installing agents on remote hosts?", options: ["True", "False", "Only on Linux", "Depends on OS"], answer: 0 },
+      { q: "What is an Ansible Role?", options: ["A user permission", "A reusable collection of tasks and files", "A module type", "A connection plugin"], answer: 1 },
+      { q: "Which module copies files to remote hosts in Ansible?", options: ["transfer", "copy", "sync", "push"], answer: 1 },
+      { q: "What is Ansible Galaxy used for?", options: ["Cloud provisioning", "Sharing and downloading roles", "Inventory management", "Encryption"], answer: 1 },
+      { q: "Which directive in a playbook specifies target hosts?", options: ["targets", "hosts", "nodes", "machines"], answer: 1 },
+      { q: "What does the 'become: yes' directive do in Ansible?", options: ["Enables debug mode", "Runs tasks with privilege escalation (sudo)", "Connects via SSH", "Enables dry-run"], answer: 1 },
+      { q: "Which Ansible module manages system services?", options: ["command", "shell", "service", "systemd"], answer: 2 },
+    ]
+  },
+  {
+    id: 6, name: "Git", icon: "🌿", category: "Version Control", color: "#f05032",
+    description: "Git is a distributed version control system that tracks changes in source code, enabling collaboration, branching, and complete history management.",
+    usage: "Source code management, team collaboration, feature branching, code reviews, and CI/CD integration.",
+    mcqs: [
+      { q: "Which command creates and switches to a new Git branch?", options: ["git new", "git branch", "git checkout -b", "git switch --new"], answer: 2 },
+      { q: "What does 'git rebase' do?", options: ["Merges branches", "Moves commits to a new base", "Deletes a branch", "Stashes changes"], answer: 1 },
+      { q: "Which file tells Git which files to ignore?", options: [".gitconfig", ".gitignore", ".gitkeep", ".gitmodules"], answer: 1 },
+      { q: "What does 'git stash' do?", options: ["Deletes changes", "Temporarily saves uncommitted changes", "Commits changes", "Pushes to remote"], answer: 1 },
+      { q: "What does 'git cherry-pick' do?", options: ["Selects a repository", "Applies a specific commit to current branch", "Deletes commits", "Compares branches"], answer: 1 },
+      { q: "What is a 'detached HEAD' state in Git?", options: ["Corrupt repository", "HEAD pointing directly to a commit, not a branch", "Missing remote", "Merge conflict state"], answer: 1 },
+      { q: "Which command shows the commit history graph?", options: ["git show", "git log --oneline --graph", "git history", "git commits"], answer: 1 },
+      { q: "What does 'git fetch' do?", options: ["Downloads and merges remote changes", "Only downloads remote changes without merging", "Pushes local changes", "Clones repository"], answer: 1 },
+      { q: "What is the purpose of 'git bisect'?", options: ["Split repository", "Find the commit that introduced a bug", "Merge branches", "Archive commits"], answer: 1 },
+      { q: "Which Git workflow uses feature branches and pull requests?", options: ["Gitflow", "GitHub Flow", "Trunk-Based Development", "Centralized Workflow"], answer: 1 },
+    ]
+  },
+  {
+    id: 7, name: "Prometheus", icon: "🔥", category: "Monitoring", color: "#e6522c",
+    description: "Prometheus is an open-source monitoring and alerting toolkit that collects metrics from configured targets at given intervals and stores them as time-series data.",
+    usage: "Infrastructure monitoring, application metrics collection, alerting on anomalies, and integration with Grafana dashboards.",
+    mcqs: [
+      { q: "What data model does Prometheus use?", options: ["Relational", "Document", "Time-series", "Graph"], answer: 2 },
+      { q: "What query language does Prometheus use?", options: ["SQL", "PromQL", "NRQL", "LogQL"], answer: 1 },
+      { q: "What is the default Prometheus port?", options: ["3000", "9090", "8080", "5000"], answer: 1 },
+      { q: "What component handles alert routing in Prometheus?", options: ["Pushgateway", "AlertManager", "Grafana", "Node Exporter"], answer: 1 },
+      { q: "What is a Prometheus 'exporter'?", options: ["A data export tool", "An agent that exposes metrics for scraping", "An alert rule", "A dashboard plugin"], answer: 1 },
+      { q: "Which Prometheus metric type tracks a value that can go up and down?", options: ["Counter", "Gauge", "Histogram", "Summary"], answer: 1 },
+      { q: "What does Prometheus 'scrape' mean?", options: ["Delete old metrics", "Pull metrics from a target endpoint", "Push metrics to storage", "Aggregate metrics"], answer: 1 },
+      { q: "What is the purpose of a Prometheus 'recording rule'?", options: ["Record alerts", "Pre-compute expensive queries as new metrics", "Store logs", "Configure exporters"], answer: 1 },
+      { q: "Which file configures Prometheus scrape targets?", options: ["prometheus.rules", "alertmanager.yml", "prometheus.yml", "targets.conf"], answer: 2 },
+      { q: "What does the 'rate()' function do in PromQL?", options: ["Calculates total count", "Computes per-second average rate of increase", "Rounds values", "Filters time series"], answer: 1 },
+    ]
+  },
+  {
+    id: 8, name: "AWS", icon: "☁️", category: "Cloud", color: "#ff9900",
+    description: "Amazon Web Services is the world's leading cloud platform offering 200+ services including compute, storage, databases, networking, AI/ML, and DevOps tools.",
+    usage: "Hosting applications, managing scalable infrastructure, serverless computing, storage, and cloud-native DevOps pipelines.",
+    mcqs: [
+      { q: "Which AWS service is used for container orchestration?", options: ["EC2", "ECS/EKS", "Lambda", "S3"], answer: 1 },
+      { q: "What does AWS IAM stand for?", options: ["Internet Access Manager", "Identity and Access Management", "Internal Admin Module", "Instance Access Monitor"], answer: 1 },
+      { q: "Which service provides serverless compute on AWS?", options: ["EC2", "ECS", "Lambda", "Fargate"], answer: 2 },
+      { q: "What AWS service is used for object storage?", options: ["EBS", "EFS", "S3", "Glacier"], answer: 2 },
+      { q: "What is AWS VPC?", options: ["Virtual Private Cloud for isolated networking", "Virtual Processing Core", "Volume Partition Controller", "Version Pipeline Control"], answer: 0 },
+      { q: "Which AWS service provides managed Kubernetes?", options: ["ECS", "EKS", "ECR", "EMR"], answer: 1 },
+      { q: "What is AWS CloudFormation used for?", options: ["Cloud monitoring", "Infrastructure as Code provisioning", "CDN management", "Database migration"], answer: 1 },
+      { q: "Which service acts as a managed load balancer on AWS?", options: ["Route 53", "CloudFront", "Elastic Load Balancing", "API Gateway"], answer: 2 },
+      { q: "What does Amazon RDS provide?", options: ["Raw disk storage", "Managed relational database service", "NoSQL database", "Cache service"], answer: 1 },
+      { q: "What is the AWS shared responsibility model?", options: ["AWS manages everything", "AWS manages infrastructure, customer manages data/apps", "Customer manages everything", "Shared billing model"], answer: 1 },
+    ]
+  },
+  {
+    id: 9, name: "Python", icon: "🐍", category: "Programming", color: "#3776ab",
+    description: "Python is a versatile, high-level programming language known for its clean syntax and powerful ecosystem. Widely used in DevOps, automation, data science, and web development.",
+    usage: "Scripting, automation, REST APIs, data pipelines, AI/ML workflows, infrastructure tooling, and cloud SDKs like boto3.",
+    mcqs: [
+      { q: "Which keyword is used to define a function in Python?", options: ["function", "def", "func", "define"], answer: 1 },
+      { q: "What is the output of: print(type([]))?", options: ["<class 'tuple'>", "<class 'list'>", "<class 'array'>", "<class 'set'>"], answer: 1 },
+      { q: "Which Python library is commonly used for HTTP requests?", options: ["httplib", "urllib2", "requests", "fetch"], answer: 2 },
+      { q: "What does 'pip' stand for?", options: ["Python Install Package", "Pip Installs Packages", "Package Index Protocol", "Python Index Path"], answer: 1 },
+      { q: "What is a Python decorator?", options: ["A comment style", "A function that modifies another function", "A class attribute", "A module type"], answer: 1 },
+      { q: "Which statement is used to handle exceptions in Python?", options: ["catch/throw", "try/except", "begin/rescue", "try/catch"], answer: 1 },
+      { q: "What does 'list comprehension' look like in Python?", options: ["[for x in range(5)]", "[x for x in range(5)]", "list(x for x in range(5))", "(x for x in range(5))"], answer: 1 },
+      { q: "What is the purpose of '__init__' in a Python class?", options: ["Import modules", "Initialize class instance attributes", "Define class methods", "Destroy objects"], answer: 1 },
+      { q: "Which Python module is used for working with JSON data?", options: ["pickle", "csv", "json", "yaml"], answer: 2 },
+      { q: "What does 'virtualenv' help with in Python projects?", options: ["Virtual machine management", "Isolated Python environments per project", "Remote code execution", "Package publishing"], answer: 1 },
+    ]
+  },
+];
 
-<section class="hero">
-  <div class="container">
-    <div class="hero-content">
-      <div class="hero-badge">DevOps Trainer · PythonLife Academy</div>
-      <h1 class="hero-name">KRISH<span class="accent">NA</span></h1>
-      <p class="hero-role">Building <strong>Cloud-Native Engineers</strong> with Real-World DevOps</p>
-      <div class="terminal">
-        <div class="terminal-bar">
-          <div class="t-dot r"></div><div class="t-dot y"></div><div class="t-dot g"></div>
-          <span class="terminal-bar-title">krishna@pythonlife ~ </span>
-        </div>
-        <div class="terminal-body">
-          <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd"> whoami</span></div>
-          <div class="t-out">DevOps Trainer · AWS Cloud Specialist</div>
-          <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd"> cat skills.txt</span></div>
-          <div class="t-out"><span>Docker</span> · <span>K8s</span> · <span>Jenkins</span> · <span>Terraform</span> · <span>AWS</span></div>
-          <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd"> ls projects/</span></div>
-          <div class="t-out"><span>10+ real-time production projects</span></div>
-          <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd"> echo $LOCATION</span></div>
-          <div class="t-out"><span>PythonLife Academy</span> <span class="cursor"></span></div>
-        </div>
-      </div>
-      <div class="hero-cta">
-        <a href="#projects" class="btn btn-primary">View Projects →</a>
-        <a href="https://github.com/milk19" target="_blank" class="btn btn-ghost">⭐ github/milk19</a>
-      </div>
-      <div class="hero-stats">
-        <div><div class="stat-num">10+</div><div class="stat-label">Real Projects</div></div>
-        <div><div class="stat-num">8+</div><div class="stat-label">DevOps Tools</div></div>
-        <div><div class="stat-num">100%</div><div class="stat-label">Hands-On</div></div>
-        <div><div class="stat-num">AWS</div><div class="stat-label">Cloud Focus</div></div>
-      </div>
-    </div>
-  </div>
-</section>
+const PASS_MARK = 7;
 
-<div class="divider"></div>
+// ─── STORAGE HELPERS ─────────────────────────────────────────────────────────
+const getUsers = () => { try { return JSON.parse(localStorage.getItem("pla_users") || "{}"); } catch { return {}; } };
+const saveUsers = (u) => localStorage.setItem("pla_users", JSON.stringify(u));
+const getSession = () => { try { return localStorage.getItem("pla_session") || null; } catch { return null; } };
+const saveSession = (u) => localStorage.setItem("pla_session", u || "");
 
-<section id="skills">
-  <div class="container">
-    <div class="section-header reveal">
-      <div class="section-tag">skills</div>
-      <h2 class="section-title">DevOps Toolchain</h2>
-    </div>
-    <div class="tools-grid">
-      <div class="tool-card reveal" style="--tool-color:#0db7ed"><div class="tool-icon">🐳</div><div class="tool-name">Docker</div><div class="tool-cat">Containerization</div><div class="tool-bar"><div class="tool-bar-fill" data-w="92" style="background:#0db7ed"></div></div></div>
-      <div class="tool-card reveal" style="--tool-color:#326ce5"><div class="tool-icon">☸️</div><div class="tool-name">Kubernetes</div><div class="tool-cat">Orchestration</div><div class="tool-bar"><div class="tool-bar-fill" data-w="85" style="background:#326ce5"></div></div></div>
-      <div class="tool-card reveal" style="--tool-color:#FF9900"><div class="tool-icon">☁️</div><div class="tool-name">AWS Cloud</div><div class="tool-cat">Cloud Platform</div><div class="tool-bar"><div class="tool-bar-fill" data-w="95" style="background:#FF9900"></div></div></div>
-      <div class="tool-card reveal" style="--tool-color:#d33833"><div class="tool-icon">🏗️</div><div class="tool-name">Jenkins</div><div class="tool-cat">CI/CD</div><div class="tool-bar"><div class="tool-bar-fill" data-w="90" style="background:#d33833"></div></div></div>
-      <div class="tool-card reveal" style="--tool-color:#7b42bc"><div class="tool-icon">🏔️</div><div class="tool-name">Terraform</div><div class="tool-cat">Infrastructure as Code</div><div class="tool-bar"><div class="tool-bar-fill" data-w="88" style="background:#7b42bc"></div></div></div>
-      <div class="tool-card reveal" style="--tool-color:#ee0000"><div class="tool-icon">⚙️</div><div class="tool-name">Ansible</div><div class="tool-cat">Config Management</div><div class="tool-bar"><div class="tool-bar-fill" data-w="82" style="background:#ee0000"></div></div></div>
-      <div class="tool-card reveal" style="--tool-color:#f05032"><div class="tool-icon">🌿</div><div class="tool-name">Git & GitHub</div><div class="tool-cat">Version Control</div><div class="tool-bar"><div class="tool-bar-fill" data-w="96" style="background:#f05032"></div></div></div>
-      <div class="tool-card reveal" style="--tool-color:#e6522c"><div class="tool-icon">🔥</div><div class="tool-name">Prometheus + Grafana</div><div class="tool-cat">Monitoring</div><div class="tool-bar"><div class="tool-bar-fill" data-w="80" style="background:#e6522c"></div></div></div>
-    </div>
-  </div>
-</section>
+// ─── AUTH PAGE ───────────────────────────────────────────────────────────────
+function AuthPage({ onLogin }) {
+  const [mode, setMode] = useState("login"); // login | register
+  const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-<div class="divider"></div>
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-<section id="projects">
-  <div class="container">
-    <div class="section-header reveal">
-      <div class="section-tag">projects</div>
-      <h2 class="section-title">Real-World Projects</h2>
-    </div>
-    <div class="projects-grid">
-      <div class="project-card reveal"><div class="project-num">PROJECT_01</div><div class="project-title">Containerized Microservices on AWS EKS</div><div class="project-desc">Deployed a production-grade microservices app using Docker + Kubernetes on AWS EKS with auto-scaling and load balancing.</div><div class="project-tags"><span class="tag">Docker</span><span class="tag">Kubernetes</span><span class="tag blue">AWS EKS</span></div></div>
-      <div class="project-card reveal"><div class="project-num">PROJECT_02</div><div class="project-title">CI/CD Pipeline with Jenkins + GitHub</div><div class="project-desc">End-to-end automated pipeline — code push triggers build, test, Docker image build, and deploy to EC2 via Jenkins.</div><div class="project-tags"><span class="tag">Jenkins</span><span class="tag">GitHub</span><span class="tag blue">AWS EC2</span></div></div>
-      <div class="project-card reveal"><div class="project-num">PROJECT_03</div><div class="project-title">AWS Infrastructure with Terraform</div><div class="project-desc">Provisioned VPC, subnets, EC2, RDS, and S3 from scratch using Terraform with remote state on S3 + DynamoDB locking.</div><div class="project-tags"><span class="tag">Terraform</span><span class="tag blue">AWS VPC</span><span class="tag blue">S3</span></div></div>
-      <div class="project-card reveal"><div class="project-num">PROJECT_04</div><div class="project-title">Server Config Automation with Ansible</div><div class="project-desc">Automated provisioning of 20+ servers with Nginx, Java, Docker installation using Ansible playbooks and roles.</div><div class="project-tags"><span class="tag">Ansible</span><span class="tag blue">AWS EC2</span><span class="tag">Linux</span></div></div>
-      <div class="project-card reveal"><div class="project-num">PROJECT_05</div><div class="project-title">Monitoring Stack: Prometheus + Grafana</div><div class="project-desc">Set up full observability stack with custom dashboards, alerting rules, and Node Exporter on Kubernetes cluster.</div><div class="project-tags"><span class="tag">Prometheus</span><span class="tag">Grafana</span><span class="tag blue">AWS EKS</span></div></div>
-      <div class="project-card reveal"><div class="project-num">PROJECT_06</div><div class="project-title">Serverless App on AWS Lambda + API GW</div><div class="project-desc">Built and deployed a serverless REST API using AWS Lambda, API Gateway, DynamoDB, and managed with SAM CLI.</div><div class="project-tags"><span class="tag blue">Lambda</span><span class="tag blue">API Gateway</span><span class="tag blue">DynamoDB</span></div></div>
-      <div class="project-card reveal"><div class="project-num">PROJECT_07</div><div class="project-title">GitOps Workflow with ArgoCD</div><div class="project-desc">Implemented GitOps using ArgoCD on EKS — every Git commit auto-syncs to Kubernetes cluster state.</div><div class="project-tags"><span class="tag">ArgoCD</span><span class="tag">GitOps</span><span class="tag blue">AWS EKS</span></div></div>
-      <div class="project-card reveal"><div class="project-num">PROJECT_08+</div><div class="project-title">More Projects on GitHub ⭐</div><div class="project-desc">Explore additional projects: multi-cloud deployments, Helm charts, SonarQube integration, and more on GitHub.</div><div class="project-tags"><span class="tag">Helm</span><span class="tag">SonarQube</span><span class="tag blue">Multi-Cloud</span></div></div>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<section id="about">
-  <div class="container">
-    <div class="about-grid">
-      <div class="about-text reveal">
-        <div class="section-tag">about</div>
-        <h2 class="section-title" style="margin-bottom:24px">Who I Am</h2>
-        <p>I'm <strong>Krishna</strong>, a DevOps Trainer at <strong>PythonLife Academy</strong> with a passion for making cloud and DevOps accessible through real, production-grade hands-on projects.</p>
-        <p>I teach students how to build, ship, and monitor applications using the same tools that top tech companies use — <strong>Docker, Kubernetes, AWS, Terraform, Jenkins</strong>, and more.</p>
-        <p>No slides-only theory. Every concept is backed by a <strong>real-world project</strong> you can show in your portfolio.</p>
-        <a href="https://github.com/milk19" target="_blank" class="btn btn-primary" style="margin-top:8px">View GitHub →</a>
-      </div>
-      <div class="reveal">
-        <div class="about-card">
-          <div class="about-card-title">// profile.json</div>
-          <div class="about-item"><div class="about-item-icon">👨‍💻</div><div><div class="about-item-label">Role</div><div class="about-item-value">DevOps Trainer</div></div></div>
-          <div class="about-item"><div class="about-item-icon">🏫</div><div><div class="about-item-label">Organization</div><div class="about-item-value">PythonLife Academy</div></div></div>
-          <div class="about-item"><div class="about-item-icon">☁️</div><div><div class="about-item-label">Specialization</div><div class="about-item-value">AWS Cloud + DevOps</div></div></div>
-          <div class="about-item"><div class="about-item-icon">🚀</div><div><div class="about-item-label">Projects Taught</div><div class="about-item-value">10+ Real-Time Projects</div></div></div>
-          <div class="about-item"><div class="about-item-icon">🐙</div><div><div class="about-item-label">GitHub</div><div class="about-item-value"><a href="https://github.com/milk19" target="_blank" style="color:#00d4ff;text-decoration:none">github.com/milk19</a></div></div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<section id="contact">
-  <div class="container">
-    <div class="contact-box reveal">
-      <h3>Let's Build Together</h3>
-      <p>Interested in DevOps training, collaboration, or a real-time project?</p>
-      <div class="contact-links">
-        <a href="https://github.com/milk19" target="_blank" class="contact-link">🐙 github/milk19</a>
-        <a href="mailto:krishna@pythonlife.in" class="contact-link">✉️ krishna@pythonlife.in</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<footer>
-  <div class="container">
-    <span>KRISHNA</span> · DevOps Trainer · PythonLife Academy · Built with ❤️ &amp; AWS ☁️
-  </div>
-</footer>
-
-<script>
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
-  }, { threshold: 0.12 });
-  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-  const barObserver = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if(e.isIntersecting) {
-        const fill = e.target.querySelector('.tool-bar-fill');
-        if(fill) fill.style.width = fill.dataset.w + '%';
+  const submit = () => {
+    setError("");
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      const users = getUsers();
+      if (mode === "register") {
+        if (!form.name.trim() || !form.email.trim() || !form.password) return setError("All fields are required.");
+        if (form.password !== form.confirm) return setError("Passwords do not match.");
+        if (form.password.length < 4) return setError("Password must be at least 4 characters.");
+        const key = form.email.toLowerCase().trim();
+        if (users[key]) return setError("Account already exists. Please login.");
+        users[key] = { name: form.name.trim(), email: key, password: form.password, certs: {}, scores: {}, joinedAt: new Date().toISOString() };
+        saveUsers(users);
+        saveSession(key);
+        onLogin(users[key]);
+      } else {
+        const key = form.email.toLowerCase().trim();
+        if (!users[key]) return setError("No account found. Please register.");
+        if (users[key].password !== form.password) return setError("Incorrect password.");
+        saveSession(key);
+        onLogin(users[key]);
       }
-    });
-  }, { threshold: 0.3 });
-  document.querySelectorAll('.tool-card').forEach(el => barObserver.observe(el));
-</script>
-</body>
-</html>
+    }, 600);
+  };
+
+  const inputStyle = {
+    width: "100%", padding: "13px 16px",
+    background: "rgba(255,255,255,0.04)",
+    border: "1px solid rgba(255,255,255,0.1)",
+    borderRadius: 10, color: "#f1f5f9",
+    fontSize: 14, fontFamily: "inherit",
+    outline: "none", boxSizing: "border-box",
+    transition: "border-color 0.2s"
+  };
+
+  return (
+    <div style={{
+      minHeight: "100vh", background: "#070b14",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: 16, fontFamily: "'Courier New', monospace",
+      position: "relative", overflow: "hidden"
+    }}>
+      <style>{`
+        @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes gridMove { from{background-position:0 0} to{background-position:48px 48px} }
+        @keyframes glow { 0%,100%{opacity:0.7} 50%{opacity:1} }
+        .auth-input:focus { border-color: rgba(0,200,255,0.5) !important; background: rgba(0,200,255,0.04) !important; }
+        .auth-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .tab-btn:hover { color: #cbd5e1 !important; }
+      `}</style>
+      <div style={{
+        position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none",
+        backgroundImage: `linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px)`,
+        backgroundSize: "48px 48px", animation: "gridMove 8s linear infinite"
+      }}/>
+      {/* Glowing orbs */}
+      <div style={{ position:"fixed", top:"20%", left:"15%", width:300, height:300, borderRadius:"50%", background:"radial-gradient(circle, rgba(0,200,255,0.06) 0%, transparent 70%)", pointerEvents:"none", zIndex:0 }}/>
+      <div style={{ position:"fixed", bottom:"20%", right:"15%", width:250, height:250, borderRadius:"50%", background:"radial-gradient(circle, rgba(124,58,237,0.08) 0%, transparent 70%)", pointerEvents:"none", zIndex:0 }}/>
+
+      <div style={{
+        position: "relative", zIndex: 10,
+        background: "linear-gradient(145deg, #0a1220 0%, #12092a 100%)",
+        border: "1px solid rgba(0,200,255,0.15)",
+        borderRadius: 20, padding: "44px 40px",
+        width: "100%", maxWidth: 440,
+        boxShadow: "0 40px 100px rgba(0,0,0,0.6), 0 0 60px rgba(0,200,255,0.06)",
+        animation: "fadeUp 0.5s ease"
+      }}>
+        {/* Logo */}
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
+          <div style={{
+            width: 72, height: 72, borderRadius: "50%", margin: "0 auto 16px",
+            background: "linear-gradient(135deg, #00c8ff, #7c3aed)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 30, boxShadow: "0 0 32px rgba(0,200,255,0.4)"
+          }}>👨‍💻</div>
+          <h1 style={{
+            margin: "0 0 4px", fontSize: 22,
+            background: "linear-gradient(90deg, #00c8ff, #a78bfa)",
+            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+            fontFamily: "'Georgia', serif"
+          }}>PythonLife Academy</h1>
+          <p style={{ margin: 0, fontSize: 12, color: "#475569", letterSpacing: 1.5, textTransform: "uppercase" }}>
+            DevOps Training Platform
+          </p>
+        </div>
+
+        {/* Tabs */}
+        <div style={{
+          display: "flex", background: "rgba(255,255,255,0.03)",
+          border: "1px solid rgba(255,255,255,0.07)",
+          borderRadius: 10, padding: 4, marginBottom: 28
+        }}>
+          {["login","register"].map(m => (
+            <button key={m} className="tab-btn" onClick={() => { setMode(m); setError(""); }} style={{
+              flex: 1, padding: "9px",
+              background: mode === m ? "rgba(0,200,255,0.12)" : "transparent",
+              border: mode === m ? "1px solid rgba(0,200,255,0.25)" : "1px solid transparent",
+              borderRadius: 8, color: mode === m ? "#00c8ff" : "#475569",
+              fontSize: 12, letterSpacing: 1.5, textTransform: "uppercase",
+              cursor: "pointer", fontFamily: "inherit", transition: "all 0.2s"
+            }}>{m === "login" ? "Sign In" : "Register"}</button>
+          ))}
+        </div>
+
+        {/* Fields */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          {mode === "register" && (
+            <div>
+              <label style={{ fontSize: 10, color: "#475569", letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 6 }}>Full Name</label>
+              <input className="auth-input" style={inputStyle} placeholder="Krishna Reddy"
+                value={form.name} onChange={e => set("name", e.target.value)} />
+            </div>
+          )}
+          <div>
+            <label style={{ fontSize: 10, color: "#475569", letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 6 }}>Email Address</label>
+            <input className="auth-input" style={inputStyle} type="email" placeholder="you@example.com"
+              value={form.email} onChange={e => set("email", e.target.value)}
+              onKeyDown={e => e.key === "Enter" && submit()} />
+          </div>
+          <div>
+            <label style={{ fontSize: 10, color: "#475569", letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 6 }}>Password</label>
+            <input className="auth-input" style={inputStyle} type="password" placeholder="••••••••"
+              value={form.password} onChange={e => set("password", e.target.value)}
+              onKeyDown={e => e.key === "Enter" && submit()} />
+          </div>
+          {mode === "register" && (
+            <div>
+              <label style={{ fontSize: 10, color: "#475569", letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 6 }}>Confirm Password</label>
+              <input className="auth-input" style={inputStyle} type="password" placeholder="••••••••"
+                value={form.confirm} onChange={e => set("confirm", e.target.value)}
+                onKeyDown={e => e.key === "Enter" && submit()} />
+            </div>
+          )}
+        </div>
+
+        {error && (
+          <div style={{
+            marginTop: 16, padding: "10px 14px",
+            background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)",
+            borderRadius: 8, fontSize: 12, color: "#f87171"
+          }}>⚠️ {error}</div>
+        )}
+
+        <button className="auth-btn" onClick={submit} style={{
+          width: "100%", marginTop: 22, padding: "14px",
+          background: loading ? "rgba(0,200,255,0.2)" : "linear-gradient(135deg, #00c8ffdd, #7c3aed)",
+          border: "none", borderRadius: 12, color: "#fff",
+          fontSize: 14, fontWeight: 700, cursor: loading ? "default" : "pointer",
+          fontFamily: "inherit", letterSpacing: 1,
+          boxShadow: "0 8px 32px rgba(0,200,255,0.2)",
+          transition: "all 0.2s"
+        }}>
+          {loading ? "⏳ Please wait..." : mode === "login" ? "🚀 Sign In" : "✨ Create Account"}
+        </button>
+
+        <p style={{ textAlign: "center", marginTop: 18, fontSize: 12, color: "#475569" }}>
+          {mode === "login" ? "Don't have an account? " : "Already registered? "}
+          <span onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(""); }}
+            style={{ color: "#00c8ff", cursor: "pointer", textDecoration: "underline" }}>
+            {mode === "login" ? "Register here" : "Sign in"}
+          </span>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ─── CERTIFICATE ─────────────────────────────────────────────────────────────
+function Certificate({ tool, score, total, userName, onClose }) {
+  const date = new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 300,
+      background: "rgba(0,0,0,0.93)", backdropFilter: "blur(20px)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: 16
+    }}>
+      <style>{`
+        @keyframes certFade { from{opacity:0;transform:scale(0.88)} to{opacity:1;transform:scale(1)} }
+        @keyframes shimmer { 0%,100%{opacity:0.5} 50%{opacity:1} }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+        @keyframes borderPulse {
+          0%,100%{box-shadow:0 0 24px ${tool.color}55,inset 0 0 24px ${tool.color}0a}
+          50%{box-shadow:0 0 60px ${tool.color}88,inset 0 0 40px ${tool.color}18}
+        }
+      `}</style>
+      <div style={{
+        background: "linear-gradient(145deg, #07090f 0%, #0d1525 40%, #150920 100%)",
+        border: `2px solid ${tool.color}`,
+        borderRadius: 24, padding: "52px 48px",
+        maxWidth: 580, width: "100%",
+        textAlign: "center", position: "relative",
+        animation: "certFade 0.5s cubic-bezier(0.34,1.56,0.64,1), borderPulse 3s ease infinite",
+        overflow: "hidden"
+      }}>
+        {/* Corner brackets */}
+        {[{t:14,l:14},{t:14,r:14},{b:14,l:14},{b:14,r:14}].map((pos,i) => (
+          <div key={i} style={{
+            position:"absolute", width:28, height:28,
+            top: pos.t, bottom: pos.b, left: pos.l, right: pos.r,
+            borderTop: pos.t !== undefined ? `2px solid ${tool.color}99` : "none",
+            borderBottom: pos.b !== undefined ? `2px solid ${tool.color}99` : "none",
+            borderLeft: pos.l !== undefined ? `2px solid ${tool.color}99` : "none",
+            borderRight: pos.r !== undefined ? `2px solid ${tool.color}99` : "none",
+          }}/>
+        ))}
+        {/* Background watermark */}
+        <div style={{
+          position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center",
+          fontSize:200, opacity:0.025, pointerEvents:"none", userSelect:"none"
+        }}>{tool.icon}</div>
+
+        <div style={{ fontSize:12, letterSpacing:8, color:tool.color, marginBottom:10, animation:"shimmer 2s ease infinite" }}>
+          ✦ ✦ ✦ ✦ ✦
+        </div>
+        <div style={{ fontSize:10, letterSpacing:5, color:"#334155", textTransform:"uppercase", marginBottom:4 }}>
+          PythonLife Academy
+        </div>
+        <div style={{ fontSize:10, letterSpacing:4, color:"#475569", textTransform:"uppercase", marginBottom:24 }}>
+          Certificate of Achievement
+        </div>
+        <div style={{ fontSize:60, marginBottom:8, animation:"float 3s ease-in-out infinite" }}>{tool.icon}</div>
+        <div style={{ fontSize:11, color:"#475569", letterSpacing:3, textTransform:"uppercase", marginBottom:8 }}>
+          This certifies that
+        </div>
+        <div style={{
+          fontSize:30, fontWeight:700, marginBottom:8, fontFamily:"'Georgia',serif",
+          background:`linear-gradient(90deg,${tool.color},#a78bfa,${tool.color})`,
+          backgroundSize:"200%",
+          WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent"
+        }}>{userName}</div>
+        <div style={{ fontSize:13, color:"#64748b", marginBottom:18, lineHeight:1.8 }}>
+          has successfully demonstrated proficiency in
+        </div>
+        <div style={{
+          fontSize:28, fontWeight:700, color:"#f1f5f9",
+          padding:"10px 32px",
+          background:`${tool.color}18`, border:`1px solid ${tool.color}44`,
+          borderRadius:12, display:"inline-block", marginBottom:18
+        }}>{tool.name}</div>
+        <br/>
+        <div style={{
+          display:"inline-flex", alignItems:"center", gap:12,
+          background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.09)",
+          borderRadius:50, padding:"8px 28px", marginBottom:24
+        }}>
+          <span style={{ fontSize:22, fontWeight:800, color:tool.color }}>{score}/{total}</span>
+          <span style={{ fontSize:12, color:"#64748b" }}>Questions Correct</span>
+          <span style={{ fontSize:20 }}>{score === total ? "🏆" : "⭐"}</span>
+        </div>
+        {/* Divider */}
+        <div style={{ display:"flex", alignItems:"center", gap:14, marginBottom:20 }}>
+          <div style={{ flex:1, height:1, background:`linear-gradient(90deg,transparent,${tool.color}44)` }}/>
+          <span style={{ color:tool.color, fontSize:14 }}>✦</span>
+          <div style={{ flex:1, height:1, background:`linear-gradient(90deg,${tool.color}44,transparent)` }}/>
+        </div>
+        <div style={{ fontSize:11, color:"#334155", marginBottom:28 }}>
+          Awarded on {date} &nbsp;|&nbsp; Trainer: Krishna &nbsp;|&nbsp; PythonLife Academy
+        </div>
+        <div style={{ display:"flex", gap:10 }}>
+          <button onClick={onClose} style={{
+            flex:1, padding:"13px",
+            background:`linear-gradient(135deg,${tool.color}cc,#7c3aed)`,
+            border:"none", borderRadius:10, color:"#fff",
+            fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:"inherit"
+          }}>🎉 Close</button>
+          <button onClick={() => window.print()} style={{
+            flex:1, padding:"13px",
+            background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.1)",
+            borderRadius:10, color:"#94a3b8", fontSize:13,
+            cursor:"pointer", fontFamily:"inherit"
+          }}>🖨️ Print</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── MAIN APP ─────────────────────────────────────────────────────────────────
+export default function App() {
+  const [user, setUser] = useState(null);
+  const [view, setView] = useState("home"); // home | quiz | profile
+  const [activeTool, setActiveTool] = useState(null);
+  const [mcqMode, setMcqMode] = useState(false);
+  const [currentQ, setCurrentQ] = useState(0);
+  const [selected, setSelected] = useState(null);
+  const [score, setScore] = useState(0);
+  const [finished, setFinished] = useState(false);
+  const [filter, setFilter] = useState("All");
+  const [showCert, setShowCert] = useState(false);
+  const [answers, setAnswers] = useState([]);
+  const [certTool, setCertTool] = useState(null);
+  const [certScore, setCertScore] = useState(0);
+
+  // Restore session
+  useEffect(() => {
+    const key = getSession();
+    if (key) {
+      const users = getUsers();
+      if (users[key]) setUser(users[key]);
+    }
+  }, []);
+
+  const handleLogin = (u) => setUser(u);
+
+  const handleLogout = () => {
+    saveSession(null);
+    setUser(null);
+    setActiveTool(null);
+    setView("home");
+  };
+
+  // Persist user data helper
+  const persistUser = (updated) => {
+    const users = getUsers();
+    users[updated.email] = updated;
+    saveUsers(users);
+    setUser(updated);
+  };
+
+  const categories = ["All", ...new Set(devopsTools.map(t => t.category))];
+  const filtered = filter === "All" ? devopsTools : devopsTools.filter(t => t.category === filter);
+
+  const openTool = (tool) => {
+    setActiveTool(tool);
+    setMcqMode(false);
+    setCurrentQ(0);
+    setSelected(null);
+    setScore(0);
+    setFinished(false);
+    setShowCert(false);
+    setAnswers([]);
+  };
+
+  const startMCQ = () => {
+    setMcqMode(true);
+    setCurrentQ(0);
+    setSelected(null);
+    setScore(0);
+    setFinished(false);
+    setShowCert(false);
+    setAnswers([]);
+  };
+
+  const handleAnswer = (idx) => {
+    if (selected !== null) return;
+    setSelected(idx);
+    const correct = idx === activeTool.mcqs[currentQ].answer;
+    if (correct) setScore(s => s + 1);
+    setAnswers(a => [...a, { q: currentQ, selected: idx, correct }]);
+  };
+
+  const nextQ = () => {
+    if (currentQ + 1 < activeTool.mcqs.length) {
+      setCurrentQ(q => q + 1);
+      setSelected(null);
+    } else {
+      const finalScore = answers.filter(a => a.correct).length + (selected !== null && selected === activeTool.mcqs[currentQ].answer ? 0 : 0);
+      setFinished(true);
+      // Save score
+      const newScore = score + (answers.length === currentQ ? 0 : 0); // score is already updated
+      const updatedUser = {
+        ...user,
+        scores: { ...user.scores, [activeTool.id]: score },
+        certs: score >= PASS_MARK
+          ? { ...user.certs, [activeTool.id]: { score, earnedAt: new Date().toISOString() } }
+          : user.certs
+      };
+      persistUser(updatedUser);
+    }
+  };
+
+  // Fix: compute passed from score state after answer
+  const totalQ = activeTool?.mcqs?.length || 10;
+  const passed = score >= PASS_MARK;
+
+  const earnedCerts = Object.keys(user?.certs || {});
+  const totalAttempted = Object.keys(user?.scores || {}).length;
+
+  if (!user) return <AuthPage onLogin={handleLogin} />;
+
+  return (
+    <div style={{
+      minHeight: "100vh", background: "#070b14",
+      fontFamily: "'Courier New', monospace", color: "#e0e6f0", overflowX: "hidden"
+    }}>
+      <style>{`
+        @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes glowText { 0%,100%{text-shadow:0 0 8px #00c8ff33} 50%{text-shadow:0 0 20px #00c8ffaa} }
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+        .tool-card { transition: all 0.3s cubic-bezier(0.4,0,0.2,1) !important; }
+        .tool-card:hover { transform: translateY(-6px) !important; }
+        .opt-btn:hover { border-color: rgba(255,255,255,0.3) !important; background: rgba(255,255,255,0.07) !important; }
+        .nav-btn:hover { color: #f1f5f9 !important; }
+        @media print {
+          body > *:not(#cert-print) { display: none !important; }
+        }
+      `}</style>
+
+      {/* Grid BG */}
+      <div style={{
+        position:"fixed", inset:0, zIndex:0, pointerEvents:"none",
+        backgroundImage:`linear-gradient(rgba(0,200,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,255,0.025) 1px,transparent 1px)`,
+        backgroundSize:"48px 48px"
+      }}/>
+
+      {/* HEADER */}
+      <header style={{
+        position:"relative", zIndex:20,
+        background:"linear-gradient(135deg,#0a1628 0%,#130a24 50%,#0a1628 100%)",
+        borderBottom:"1px solid rgba(0,200,255,0.1)",
+        boxShadow:"0 4px 40px rgba(0,0,0,0.5)"
+      }}>
+        <div style={{ maxWidth:1160, margin:"0 auto", padding:"18px 24px", display:"flex", alignItems:"center", gap:16, flexWrap:"wrap" }}>
+          {/* Logo */}
+          <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+            <div style={{
+              width:44, height:44, borderRadius:"50%",
+              background:"linear-gradient(135deg,#00c8ff,#7c3aed)",
+              display:"flex", alignItems:"center", justifyContent:"center",
+              fontSize:20, boxShadow:"0 0 20px rgba(0,200,255,0.4)"
+            }}>👨‍💻</div>
+            <div>
+              <div style={{
+                fontSize:16, fontFamily:"'Georgia',serif",
+                background:"linear-gradient(90deg,#00c8ff,#a78bfa)",
+                WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent",
+                animation:"glowText 3s ease infinite"
+              }}>PythonLife Academy</div>
+              <div style={{ fontSize:9, color:"#334155", letterSpacing:2, textTransform:"uppercase" }}>by Krishna</div>
+            </div>
+          </div>
+
+          {/* Nav */}
+          <nav style={{ display:"flex", gap:4, marginLeft:24 }}>
+            {[["home","🏠 Tools"],["profile","👤 My Profile"]].map(([v,label]) => (
+              <button key={v} className="nav-btn" onClick={() => { setView(v); setActiveTool(null); }} style={{
+                padding:"8px 16px", borderRadius:8,
+                background: view === v ? "rgba(0,200,255,0.1)" : "transparent",
+                border: view === v ? "1px solid rgba(0,200,255,0.25)" : "1px solid transparent",
+                color: view === v ? "#00c8ff" : "#475569",
+                fontSize:12, cursor:"pointer", fontFamily:"inherit", letterSpacing:0.5,
+                transition:"all 0.2s"
+              }}>{label}</button>
+            ))}
+          </nav>
+
+          {/* User info */}
+          <div style={{ marginLeft:"auto", display:"flex", alignItems:"center", gap:12 }}>
+            <div style={{ textAlign:"right" }}>
+              <div style={{ fontSize:13, color:"#f1f5f9", fontWeight:600 }}>{user.name}</div>
+              <div style={{ fontSize:10, color:"#334155" }}>
+                🏆 {earnedCerts.length} cert{earnedCerts.length !== 1 ? "s" : ""} earned
+              </div>
+            </div>
+            <div style={{
+              width:38, height:38, borderRadius:"50%",
+              background:"linear-gradient(135deg,#00c8ff44,#7c3aed44)",
+              border:"1px solid rgba(0,200,255,0.3)",
+              display:"flex", alignItems:"center", justifyContent:"center",
+              fontSize:16
+            }}>{user.name[0].toUpperCase()}</div>
+            <button onClick={handleLogout} style={{
+              padding:"7px 14px", borderRadius:8,
+              background:"rgba(239,68,68,0.08)", border:"1px solid rgba(239,68,68,0.2)",
+              color:"#f87171", fontSize:11, cursor:"pointer", fontFamily:"inherit",
+              letterSpacing:1, transition:"all 0.2s"
+            }}>Sign Out</button>
+          </div>
+        </div>
+      </header>
+
+      {/* BANNER */}
+      <div style={{
+        position:"relative", zIndex:10,
+        background:"linear-gradient(90deg,rgba(0,200,255,0.06),rgba(124,58,237,0.06))",
+        borderBottom:"1px solid rgba(0,200,255,0.08)",
+        textAlign:"center", padding:"9px 24px"
+      }}>
+        <span style={{ fontSize:11, color:"#475569", letterSpacing:0.5 }}>
+          🎓 Score <span style={{ color:"#00c8ff", fontWeight:700 }}>7 or more out of 10</span> in any quiz to earn your <span style={{ color:"#a78bfa" }}>Certificate of Achievement</span>
+        </span>
+      </div>
+
+      {/* ── PROFILE VIEW ── */}
+      {view === "profile" && (
+        <div style={{ maxWidth:1160, margin:"0 auto", padding:"32px 24px", animation:"slideUp 0.4s ease" }}>
+          {/* Profile card */}
+          <div style={{
+            background:"linear-gradient(145deg,#0a1220,#12092a)",
+            border:"1px solid rgba(0,200,255,0.12)",
+            borderRadius:16, padding:"32px", marginBottom:28,
+            display:"flex", alignItems:"center", gap:24, flexWrap:"wrap"
+          }}>
+            <div style={{
+              width:80, height:80, borderRadius:"50%",
+              background:"linear-gradient(135deg,#00c8ff55,#7c3aed55)",
+              border:"2px solid rgba(0,200,255,0.3)",
+              display:"flex", alignItems:"center", justifyContent:"center",
+              fontSize:32, fontWeight:700, color:"#f1f5f9"
+            }}>{user.name[0].toUpperCase()}</div>
+            <div>
+              <h2 style={{ margin:"0 0 4px", fontSize:22, color:"#f1f5f9", fontFamily:"'Georgia',serif" }}>{user.name}</h2>
+              <div style={{ fontSize:12, color:"#475569" }}>{user.email}</div>
+              <div style={{ fontSize:11, color:"#334155", marginTop:4 }}>
+                Joined {new Date(user.joinedAt).toLocaleDateString("en-IN",{day:"numeric",month:"long",year:"numeric"})}
+              </div>
+            </div>
+            <div style={{ marginLeft:"auto", display:"flex", gap:12, flexWrap:"wrap" }}>
+              {[
+                ["🏆", earnedCerts.length, "Certificates"],
+                ["📝", totalAttempted, "Attempted"],
+                ["🎯", `${earnedCerts.length}/${devopsTools.length}`, "Progress"]
+              ].map(([icon,val,lbl]) => (
+                <div key={lbl} style={{
+                  textAlign:"center", background:"rgba(255,255,255,0.03)",
+                  border:"1px solid rgba(255,255,255,0.07)", borderRadius:12, padding:"14px 20px"
+                }}>
+                  <div style={{ fontSize:22 }}>{icon}</div>
+                  <div style={{ fontSize:20, fontWeight:700, color:"#00c8ff" }}>{val}</div>
+                  <div style={{ fontSize:10, color:"#334155", letterSpacing:1 }}>{lbl}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Certificates grid */}
+          <h3 style={{ margin:"0 0 16px", fontSize:14, color:"#64748b", letterSpacing:2, textTransform:"uppercase" }}>
+            Earned Certificates
+          </h3>
+          {earnedCerts.length === 0 ? (
+            <div style={{
+              background:"rgba(255,255,255,0.02)", border:"1px dashed rgba(255,255,255,0.07)",
+              borderRadius:12, padding:"40px", textAlign:"center", color:"#334155"
+            }}>
+              <div style={{ fontSize:40, marginBottom:12 }}>🎯</div>
+              <div style={{ fontSize:14, marginBottom:8 }}>No certificates yet</div>
+              <div style={{ fontSize:12 }}>Score 7+ on any quiz to earn your first certificate!</div>
+            </div>
+          ) : (
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))", gap:14 }}>
+              {earnedCerts.map(id => {
+                const tool = devopsTools.find(t => t.id === parseInt(id));
+                const cert = user.certs[id];
+                if (!tool) return null;
+                const rgb = tool.color.replace('#','').match(/.{2}/g).map(h=>parseInt(h,16));
+                return (
+                  <div key={id} style={{
+                    background:`linear-gradient(145deg,rgba(10,14,26,0.95),rgba(20,10,40,0.8))`,
+                    border:`1px solid rgba(${rgb.join(',')},0.3)`,
+                    borderRadius:12, padding:20,
+                    position:"relative", overflow:"hidden"
+                  }}>
+                    <div style={{
+                      position:"absolute", top:0, right:0, width:70, height:70,
+                      borderRadius:"0 12px 0 70px", background:`rgba(${rgb.join(',')},0.1)`
+                    }}/>
+                    <div style={{ fontSize:28, marginBottom:10 }}>{tool.icon}</div>
+                    <div style={{ fontSize:14, fontWeight:600, color:"#f1f5f9", marginBottom:4 }}>{tool.name}</div>
+                    <div style={{ fontSize:9, letterSpacing:2, color:tool.color, marginBottom:10, textTransform:"uppercase" }}>{tool.category}</div>
+                    <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+                      <span style={{
+                        fontSize:12, fontWeight:700, color:tool.color,
+                        background:`rgba(${rgb.join(',')},0.12)`,
+                        padding:"4px 10px", borderRadius:6
+                      }}>Score: {cert.score}/10</span>
+                      <span style={{ fontSize:11, color:"#334155" }}>
+                        {new Date(cert.earnedAt).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"})}
+                      </span>
+                    </div>
+                    <button onClick={() => { setCertTool(tool); setCertScore(cert.score); setShowCert(true); }} style={{
+                      width:"100%", marginTop:14, padding:"9px",
+                      background:`rgba(${rgb.join(',')},0.12)`,
+                      border:`1px solid rgba(${rgb.join(',')},0.3)`,
+                      borderRadius:8, color:tool.color,
+                      fontSize:11, cursor:"pointer", fontFamily:"inherit", letterSpacing:1
+                    }}>🏆 View Certificate</button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Scores table */}
+          {totalAttempted > 0 && (
+            <>
+              <h3 style={{ margin:"28px 0 16px", fontSize:14, color:"#64748b", letterSpacing:2, textTransform:"uppercase" }}>
+                Quiz History
+              </h3>
+              <div style={{
+                background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)",
+                borderRadius:12, overflow:"hidden"
+              }}>
+                {devopsTools.filter(t => user.scores[t.id] !== undefined).map((tool, i) => {
+                  const s = user.scores[tool.id];
+                  const hasCert = !!user.certs[tool.id];
+                  const rgb = tool.color.replace('#','').match(/.{2}/g).map(h=>parseInt(h,16));
+                  return (
+                    <div key={tool.id} style={{
+                      display:"flex", alignItems:"center", gap:14, padding:"14px 20px",
+                      borderBottom: i < devopsTools.filter(t=>user.scores[t.id]!==undefined).length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none"
+                    }}>
+                      <span style={{ fontSize:24 }}>{tool.icon}</span>
+                      <div style={{ flex:1 }}>
+                        <div style={{ fontSize:13, color:"#f1f5f9" }}>{tool.name}</div>
+                        <div style={{ fontSize:10, color:"#334155", letterSpacing:1 }}>{tool.category}</div>
+                      </div>
+                      <div style={{ display:"flex", alignItems:"center", gap:4 }}>
+                        {[...Array(10)].map((_,j) => (
+                          <div key={j} style={{
+                            width:10, height:10, borderRadius:2,
+                            background: j < s ? `rgba(${rgb.join(',')},0.8)` : "rgba(255,255,255,0.06)"
+                          }}/>
+                        ))}
+                      </div>
+                      <span style={{ fontSize:14, fontWeight:700, color: hasCert ? "#22c55e" : s >= PASS_MARK ? "#22c55e" : "#f87171", minWidth:36, textAlign:"center" }}>{s}/10</span>
+                      {hasCert ? <span style={{ fontSize:14 }}>🏆</span> : <span style={{ fontSize:14, opacity:0.3 }}>—</span>}
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* ── HOME / TOOLS VIEW ── */}
+      {view === "home" && (
+        <>
+          {/* Filter */}
+          <div style={{
+            position:"relative", zIndex:10, maxWidth:1160, margin:"0 auto",
+            padding:"22px 24px 0", display:"flex", gap:8, flexWrap:"wrap"
+          }}>
+            {categories.map(cat => (
+              <button key={cat} onClick={() => setFilter(cat)} style={{
+                padding:"7px 18px", borderRadius:20, border:"1px solid",
+                borderColor: filter===cat ? "#00c8ff" : "rgba(255,255,255,0.08)",
+                background: filter===cat ? "rgba(0,200,255,0.1)" : "transparent",
+                color: filter===cat ? "#00c8ff" : "#475569",
+                fontSize:11, cursor:"pointer", letterSpacing:1.5,
+                transition:"all 0.2s", textTransform:"uppercase", fontFamily:"inherit"
+              }}>{cat}</button>
+            ))}
+          </div>
+
+          {/* Tools Grid */}
+          <main style={{
+            position:"relative", zIndex:10, maxWidth:1160, margin:"0 auto",
+            padding:"22px 24px",
+            display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(248px,1fr))", gap:16
+          }}>
+            {filtered.map(tool => {
+              const rgb = tool.color.replace('#','').match(/.{2}/g).map(h=>parseInt(h,16));
+              const hasCert = !!user.certs?.[tool.id];
+              const bestScore = user.scores?.[tool.id];
+              return (
+                <div key={tool.id} className="tool-card" onClick={() => openTool(tool)} style={{
+                  background:`linear-gradient(145deg,rgba(10,14,26,0.95),rgba(20,10,40,0.8))`,
+                  border:`1px solid rgba(${rgb.join(',')},${hasCert?0.45:0.2})`,
+                  borderRadius:14, padding:"22px", cursor:"pointer",
+                  position:"relative", overflow:"hidden",
+                  boxShadow: hasCert ? `0 0 20px rgba(${rgb.join(',')},0.1)` : "none"
+                }}>
+                  <div style={{
+                    position:"absolute", top:0, right:0, width:90, height:90,
+                    borderRadius:"0 14px 0 90px", background:`rgba(${rgb.join(',')},0.1)`
+                  }}/>
+                  {/* Cert badge */}
+                  {hasCert && (
+                    <div style={{
+                      position:"absolute", top:10, left:10,
+                      fontSize:9, letterSpacing:1, textTransform:"uppercase",
+                      color:"#22c55e", background:"rgba(34,197,94,0.12)",
+                      padding:"3px 8px", borderRadius:3, border:"1px solid rgba(34,197,94,0.25)"
+                    }}>✓ Certified</div>
+                  )}
+                  <div style={{
+                    position:"absolute", top:10, right:10,
+                    fontSize:9, letterSpacing:1.5, textTransform:"uppercase",
+                    color:tool.color, background:`rgba(${rgb.join(',')},0.12)`,
+                    padding:"3px 8px", borderRadius:3, border:`1px solid rgba(${rgb.join(',')},0.2)`
+                  }}>10 MCQs</div>
+
+                  <div style={{ fontSize:36, marginBottom:12, marginTop: hasCert ? 16 : 0 }}>{tool.icon}</div>
+                  <h3 style={{ margin:"0 0 6px", fontSize:15, color:"#f1f5f9", fontWeight:600 }}>{tool.name}</h3>
+                  <span style={{
+                    fontSize:9, letterSpacing:2, textTransform:"uppercase",
+                    color:tool.color, background:`rgba(${rgb.join(',')},0.12)`,
+                    padding:"2px 8px", borderRadius:3
+                  }}>{tool.category}</span>
+                  <p style={{ margin:"12px 0 0", fontSize:12, color:"#3d4f63", lineHeight:1.7 }}>
+                    {tool.description.slice(0,82)}...
+                  </p>
+                  {bestScore !== undefined && (
+                    <div style={{ marginTop:12, display:"flex", alignItems:"center", gap:8 }}>
+                      <div style={{ display:"flex", gap:2 }}>
+                        {[...Array(10)].map((_,i) => (
+                          <div key={i} style={{
+                            width:8, height:8, borderRadius:1,
+                            background: i < bestScore ? `rgba(${rgb.join(',')},0.8)` : "rgba(255,255,255,0.05)"
+                          }}/>
+                        ))}
+                      </div>
+                      <span style={{ fontSize:10, color: bestScore>=PASS_MARK?"#22c55e":"#64748b" }}>{bestScore}/10</span>
+                    </div>
+                  )}
+                  <div style={{ marginTop:14, fontSize:11, color:"#00c8ff", letterSpacing:0.5 }}>
+                    Explore + Quiz →
+                  </div>
+                </div>
+              );
+            })}
+          </main>
+        </>
+      )}
+
+      {/* ── TOOL MODAL ── */}
+      {activeTool && (
+        <div style={{
+          position:"fixed", inset:0, zIndex:100,
+          background:"rgba(0,0,0,0.88)", backdropFilter:"blur(14px)",
+          display:"flex", alignItems:"center", justifyContent:"center", padding:16
+        }} onClick={e => { if (e.target === e.currentTarget) setActiveTool(null); }}>
+          <div style={{
+            background:"linear-gradient(145deg,#0a1220,#150924)",
+            border:`1px solid ${activeTool.color}44`,
+            borderRadius:18, padding:"32px",
+            width:"100%", maxWidth:580, maxHeight:"92vh", overflowY:"auto",
+            boxShadow:`0 40px 100px rgba(0,0,0,0.7),0 0 60px ${activeTool.color}18`,
+            position:"relative", animation:"slideUp 0.3s ease"
+          }}>
+            <button onClick={() => setActiveTool(null)} style={{
+              position:"absolute", top:16, right:16,
+              background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.08)",
+              color:"#475569", width:34, height:34, borderRadius:"50%",
+              cursor:"pointer", fontSize:18, lineHeight:"34px", textAlign:"center"
+            }}>×</button>
+
+            {/* Info */}
+            {!mcqMode && !finished && (
+              <>
+                <div style={{ display:"flex", alignItems:"center", gap:16, marginBottom:24 }}>
+                  <span style={{ fontSize:48 }}>{activeTool.icon}</span>
+                  <div>
+                    <h2 style={{ margin:0, fontSize:22, color:"#f1f5f9" }}>{activeTool.name}</h2>
+                    <span style={{ fontSize:10, letterSpacing:2.5, textTransform:"uppercase", color:activeTool.color }}>
+                      {activeTool.category}
+                    </span>
+                  </div>
+                  {user.certs?.[activeTool.id] && (
+                    <span style={{
+                      marginLeft:"auto", fontSize:11, color:"#22c55e",
+                      background:"rgba(34,197,94,0.1)", border:"1px solid rgba(34,197,94,0.25)",
+                      padding:"4px 12px", borderRadius:6
+                    }}>✓ Certified</span>
+                  )}
+                </div>
+                <div style={{ background:"rgba(255,255,255,0.025)", borderRadius:12, padding:18, marginBottom:14, borderLeft:`3px solid ${activeTool.color}` }}>
+                  <div style={{ fontSize:10, color:"#3d4f63", letterSpacing:2, marginBottom:10, textTransform:"uppercase" }}>📖 Description</div>
+                  <p style={{ margin:0, fontSize:13, color:"#94a3b8", lineHeight:1.85 }}>{activeTool.description}</p>
+                </div>
+                <div style={{ background:"rgba(255,255,255,0.025)", borderRadius:12, padding:18, marginBottom:20, borderLeft:"3px solid #a78bfa" }}>
+                  <div style={{ fontSize:10, color:"#3d4f63", letterSpacing:2, marginBottom:10, textTransform:"uppercase" }}>🛠️ Usage</div>
+                  <p style={{ margin:0, fontSize:13, color:"#94a3b8", lineHeight:1.85 }}>{activeTool.usage}</p>
+                </div>
+                <div style={{
+                  background:"rgba(167,139,250,0.06)", border:"1px solid rgba(167,139,250,0.2)",
+                  borderRadius:10, padding:"12px 16px", marginBottom:20,
+                  display:"flex", alignItems:"center", gap:12
+                }}>
+                  <span style={{ fontSize:22 }}>🏆</span>
+                  <div>
+                    <div style={{ fontSize:12, color:"#a78bfa", fontWeight:600, marginBottom:2 }}>Certificate Available</div>
+                    <div style={{ fontSize:11, color:"#475569" }}>Score 7 or more out of 10 to earn your certificate</div>
+                  </div>
+                </div>
+                <button onClick={startMCQ} style={{
+                  width:"100%", padding:"15px",
+                  background:`linear-gradient(135deg,${activeTool.color}dd,#7c3aed)`,
+                  border:"none", borderRadius:12, color:"#fff",
+                  fontSize:14, fontWeight:700, cursor:"pointer", letterSpacing:1,
+                  fontFamily:"inherit", boxShadow:`0 10px 32px ${activeTool.color}44`
+                }}>🧠 Start MCQ Quiz — 10 Questions</button>
+              </>
+            )}
+
+            {/* Quiz */}
+            {mcqMode && !finished && (
+              <>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:14 }}>
+                  <span style={{ fontSize:12, color:"#3d4f63" }}>{activeTool.icon} {activeTool.name}</span>
+                  <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+                    <span style={{ fontSize:11, color:"#22c55e" }}>✓ {score}</span>
+                    <span style={{
+                      fontSize:11, padding:"4px 12px", borderRadius:20,
+                      background:"rgba(0,200,255,0.08)", color:"#00c8ff", border:"1px solid rgba(0,200,255,0.2)"
+                    }}>Q {currentQ+1}/{totalQ}</span>
+                  </div>
+                </div>
+                <div style={{ background:"rgba(255,255,255,0.05)", borderRadius:4, height:5, marginBottom:22, overflow:"hidden" }}>
+                  <div style={{
+                    height:"100%", borderRadius:4,
+                    background:`linear-gradient(90deg,${activeTool.color},#7c3aed)`,
+                    width:`${(currentQ/totalQ)*100}%`, transition:"width 0.4s ease"
+                  }}/>
+                </div>
+                <h3 style={{
+                  margin:"0 0 22px", fontSize:14, color:"#f1f5f9", lineHeight:1.7,
+                  padding:"16px 18px", background:"rgba(255,255,255,0.025)",
+                  borderRadius:10, borderLeft:`3px solid ${activeTool.color}`
+                }}>{currentQ+1}. {activeTool.mcqs[currentQ].q}</h3>
+                <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+                  {activeTool.mcqs[currentQ].options.map((opt, idx) => {
+                    const isAnswer = idx === activeTool.mcqs[currentQ].answer;
+                    const isSelected = idx === selected;
+                    let bg="rgba(255,255,255,0.03)", border="rgba(255,255,255,0.08)", color="#94a3b8", prefix="";
+                    if (selected !== null) {
+                      if (isAnswer) { bg="rgba(34,197,94,0.12)"; border="#22c55e66"; color="#22c55e"; prefix="✓ "; }
+                      else if (isSelected) { bg="rgba(239,68,68,0.12)"; border="#ef444466"; color="#ef4444"; prefix="✗ "; }
+                    }
+                    return (
+                      <button key={idx} className={selected===null?"opt-btn":""} onClick={() => handleAnswer(idx)} style={{
+                        background:bg, border:`1px solid ${border}`, borderRadius:10, padding:"13px 16px",
+                        color, textAlign:"left", cursor:selected!==null?"default":"pointer",
+                        fontSize:13, fontFamily:"inherit", transition:"all 0.2s", display:"flex", gap:12, alignItems:"center"
+                      }}>
+                        <span style={{
+                          width:26, height:26, borderRadius:"50%", flexShrink:0,
+                          background:"rgba(255,255,255,0.05)", border:`1px solid ${border}`,
+                          display:"flex", alignItems:"center", justifyContent:"center",
+                          fontSize:10, color, fontWeight:700
+                        }}>{["A","B","C","D"][idx]}</span>
+                        <span>{prefix}{opt}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                {selected !== null && (
+                  <button onClick={nextQ} style={{
+                    width:"100%", marginTop:18, padding:"13px",
+                    background:"linear-gradient(135deg,#7c3aed,#00c8ff55,#7c3aed)",
+                    border:"1px solid rgba(0,200,255,0.3)", borderRadius:12,
+                    color:"#fff", fontSize:13, fontWeight:700, cursor:"pointer",
+                    fontFamily:"inherit", letterSpacing:0.5
+                  }}>{currentQ+1 < totalQ ? "Next Question →" : "See Results 🎯"}</button>
+                )}
+              </>
+            )}
+
+            {/* Results */}
+            {finished && (
+              <div style={{ textAlign:"center", padding:"10px 0", animation:"slideUp 0.4s ease" }}>
+                <div style={{ fontSize:68, marginBottom:16 }}>
+                  {score===totalQ?"🏆":passed?"🎉":"📚"}
+                </div>
+                <div style={{
+                  display:"inline-flex", flexDirection:"column", alignItems:"center",
+                  width:120, height:120, borderRadius:"50%",
+                  background: passed?"linear-gradient(135deg,rgba(34,197,94,0.15),rgba(0,200,255,0.15))":"rgba(255,255,255,0.04)",
+                  border:`3px solid ${passed?"#22c55e":"#ef4444"}`,
+                  justifyContent:"center", margin:"0 auto 20px",
+                  boxShadow: passed?"0 0 32px rgba(34,197,94,0.3)":"none"
+                }}>
+                  <div style={{ fontSize:32, fontWeight:800, color:passed?"#22c55e":"#ef4444" }}>{score}</div>
+                  <div style={{ fontSize:12, color:"#475569" }}>out of {totalQ}</div>
+                </div>
+                <h2 style={{ margin:"0 0 8px", fontSize:20, color:"#f1f5f9" }}>
+                  {score===totalQ?"Perfect Score!":passed?"You Passed! 🎓":"Keep Practicing! 💪"}
+                </h2>
+                <p style={{ color:"#475569", marginBottom:20, fontSize:13, lineHeight:1.7 }}>
+                  {passed
+                    ? `You scored ${score}/10 — Your certificate has been saved to your profile!`
+                    : `You scored ${score}/10 — You need at least 7 to earn a certificate. Try again!`}
+                </p>
+                {/* Answer dots */}
+                <div style={{ background:"rgba(255,255,255,0.025)", borderRadius:12, padding:16, marginBottom:20, textAlign:"left" }}>
+                  <div style={{ fontSize:10, color:"#3d4f63", letterSpacing:2, marginBottom:10, textTransform:"uppercase" }}>Answer Summary</div>
+                  <div style={{ display:"flex", gap:4, flexWrap:"wrap" }}>
+                    {answers.map((a,i) => (
+                      <div key={i} style={{
+                        width:30, height:30, borderRadius:"50%",
+                        background:a.correct?"rgba(34,197,94,0.15)":"rgba(239,68,68,0.15)",
+                        border:`1px solid ${a.correct?"#22c55e44":"#ef444444"}`,
+                        display:"flex", alignItems:"center", justifyContent:"center",
+                        fontSize:11, color:a.correct?"#22c55e":"#ef4444", fontWeight:700
+                      }}>{a.correct?"✓":"✗"}</div>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+                  {passed && (
+                    <button onClick={() => { setCertTool(activeTool); setCertScore(score); setShowCert(true); }} style={{
+                      width:"100%", padding:"14px",
+                      background:"linear-gradient(135deg,#22c55ecc,#00c8ffcc)",
+                      border:"none", borderRadius:12, color:"#fff",
+                      fontSize:14, fontWeight:700, cursor:"pointer", fontFamily:"inherit",
+                      boxShadow:"0 8px 32px rgba(34,197,94,0.3)"
+                    }}>🏆 View My Certificate</button>
+                  )}
+                  <div style={{ display:"flex", gap:10 }}>
+                    <button onClick={startMCQ} style={{
+                      flex:1, padding:"12px", background:"rgba(255,255,255,0.04)",
+                      border:`1px solid ${activeTool.color}44`, borderRadius:10,
+                      color:activeTool.color, cursor:"pointer", fontFamily:"inherit", fontSize:13
+                    }}>🔄 Retry Quiz</button>
+                    <button onClick={() => { setFinished(false); setMcqMode(false); }} style={{
+                      flex:1, padding:"12px", background:"rgba(255,255,255,0.03)",
+                      border:"1px solid rgba(255,255,255,0.08)", borderRadius:10,
+                      color:"#475569", cursor:"pointer", fontFamily:"inherit", fontSize:13
+                    }}>← Back to Tool</button>
+                  </div>
+                  {passed && (
+                    <button onClick={() => { setActiveTool(null); setView("profile"); }} style={{
+                      width:"100%", padding:"11px", background:"transparent",
+                      border:"1px solid rgba(167,139,250,0.25)", borderRadius:10,
+                      color:"#a78bfa", cursor:"pointer", fontFamily:"inherit", fontSize:12
+                    }}>👤 View Profile & All Certificates</button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Certificate overlay */}
+      {showCert && certTool && (
+        <Certificate
+          tool={certTool}
+          score={certScore}
+          total={10}
+          userName={user.name}
+          onClose={() => setShowCert(false)}
+        />
+      )}
+    </div>
+  );
+}
